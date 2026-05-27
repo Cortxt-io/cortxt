@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import ReactFlow, {
   Background,
   useNodesState,
+  useEdgesState,
   Controls,
 } from 'reactflow';
 import StatusBadge from './StatusBadge';
