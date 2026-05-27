@@ -111,6 +111,14 @@ a:hover { color: var(--accent-h); text-decoration: underline; }
 .react-flow__controls-button:hover { background: var(--bg); }
 .react-flow__edges { z-index: 10 !important; pointer-events: none; }
 .react-flow__edge-path { stroke: #1e1e1e; stroke-width: 1.5; }
+.react-flow__node.selected > div,
+.react-flow__node:focus > div {
+  outline: none;
+  box-shadow: none;
+}
+.react-flow__node.selected {
+  outline: none;
+}
 
 /* ── Responsive ─────────────────────────────────────────── */
 @media (max-width: 640px) {

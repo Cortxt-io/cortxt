@@ -18,20 +18,16 @@ const nodeStyle = {
   fontFamily: '"JetBrains Mono", monospace',
   fontSize: '0.8rem',
   color: 'var(--text)',
-  width: '200px',
-  minWidth: '200px',
-  maxWidth: '200px',
+  width: '220px',
+  minWidth: '220px',
+  maxWidth: '220px',
   textAlign: 'center',
   cursor: 'pointer',
 };
 
 function ProjectNode({ data }) {
   return (
-    <div
-      style={nodeStyle}
-      onClick={() => data.onNavigate(data.slug)}
-      title="View project"
-    >
+    <div style={nodeStyle}>
       <div style={{ fontWeight: 600, marginBottom: '4px' }}>{data.label}</div>
       <StatusBadge status={data.status} />
     </div>
@@ -74,14 +70,15 @@ const nodeTypes = {
 
 // ── Build graph data ───────────────────────────────────────
 
-const GROUP_PADDING = 60;
+const GROUP_PADDING = 40;
 const GROUP_HEADER = 30;
-const NODE_WIDTH = 200;
+const NODE_WIDTH = 220;
 const NODE_HEIGHT = 60;
 const Y_STEP = 80;
-const X_STEP = 260;
+const X_STEP = 300;
+const BOTTOM_PADDING = 30;
 
-function buildGraphData(projects, onNavigate) {
+function buildGraphData(projects) {
   const families = {};
   projects.forEach((p) => {
     if (!families[p.family]) families[p.family] = [];
@@ -96,7 +93,7 @@ function buildGraphData(projects, onNavigate) {
     const familyColor = getFamilyColor(family);
     const familyLabel = getFamilyLabel(family);
     const groupX = colIdx * X_STEP;
-    const groupHeight = GROUP_HEADER + familyProjects.length * Y_STEP + GROUP_PADDING;
+    const groupHeight = GROUP_HEADER + familyProjects.length * Y_STEP + BOTTOM_PADDING;
 
     // Group node
     nodes.push({
@@ -127,11 +124,9 @@ function buildGraphData(projects, onNavigate) {
           label: project.title,
           status: project.status,
           slug: project.slug,
-          onNavigate,
         },
         draggable: false,
-        selectable: false,
-        style: { pointerEvents: 'all' },
+        selectable: true,
       });
     });
   });
@@ -143,8 +138,8 @@ function buildGraphData(projects, onNavigate) {
 
 export default function GraphView({ projects, onClose, onNavigate }) {
   const { nodes: initialNodes, edges: initialEdges } = useMemo(
-    () => buildGraphData(projects, onNavigate),
-    [projects, onNavigate]
+    () => buildGraphData(projects),
+    [projects]
   );
 
   const [nodes] = useNodesState(initialNodes);
@@ -196,7 +191,7 @@ export default function GraphView({ projects, onClose, onNavigate }) {
         zoomOnDoubleClick={false}
         nodesDraggable={false}
         nodesConnectable={false}
-        elementsSelectable={false}
+        elementsSelectable={true}
         selectNodesOnDrag={false}
         proOptions={{ hideAttribution: true }}
       >
