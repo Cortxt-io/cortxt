@@ -52,3 +52,16 @@ export async function rejectProject(slug) {
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
   return res.json();
 }
+
+export async function fetchBrief() {
+  const res = await fetch(`${BASE}/api/brief`, { headers: authHeaders() });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return res.json();
+}
+
+// No auth — /api/activity is public
+export async function fetchActivity() {
+  const res = await fetch(`${BASE}/api/activity`);
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return res.json();
+}

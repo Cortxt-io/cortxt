@@ -4,7 +4,7 @@ export default function Sidebar({ navItems, currentPath }) {
   const navigate = useNavigate();
 
   function isActive(item) {
-    if (item.path === '/') return currentPath === '/';
+    if (item.path === '/' || item.path === '/portfolio') return currentPath === item.path;
     return currentPath.startsWith(item.path);
   }
 

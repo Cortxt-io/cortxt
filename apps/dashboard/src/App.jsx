@@ -3,10 +3,12 @@ import { HashRouter, Routes, Route, Navigate, useNavigate, useLocation } from 'r
 import useProjects from './hooks/useProjects';
 import usePending from './hooks/usePending';
 import useAnalyzeList from './hooks/useAnalyzeList';
+import useBrief from './hooks/useBrief';
 import Nav from './components/Nav';
 import Sidebar from './components/Sidebar';
 import GraphView from './components/GraphView';
 import ProjectDetail from './components/ProjectDetail';
+import BriefView from './views/BriefView';
 import PortfolioView from './views/PortfolioView';
 import MetricsView from './views/MetricsView';
 import PendingView from './views/PendingView';
@@ -17,6 +19,7 @@ function AppShell() {
   const { projects, loading, error } = useProjects();
   const { pending, loading: pendingLoading, error: pendingError, refresh: refreshPending } = usePending();
   const { projects: analyzeProjects, loading: analyzeLoading, refresh: refreshAnalyze } = useAnalyzeList();
+  const { brief, loading: briefLoading, error: briefError, refresh: refreshBrief, generatedAt: briefGeneratedAt } = useBrief();
   const [showGraph, setShowGraph] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
@@ -27,7 +30,8 @@ function AppShell() {
   }, [navigate]);
 
   const navItems = [
-    { path: '/', label: 'Portfolio', icon: '⊞' },
+    { path: '/', label: 'Brief', icon: '◈' },
+    { path: '/portfolio', label: 'Portfolio', icon: '⊞' },
     { path: '/metrics', label: 'Metrics', icon: '▦' },
     { path: '/analyze', label: 'AI / Analysera', icon: '⚡', badge: pending.length },
     { path: '/activity', label: 'Activity', icon: '◎' },
@@ -51,6 +55,10 @@ function AppShell() {
           <Routes>
             <Route
               path="/"
+              element={<BriefView brief={brief} loading={briefLoading} error={briefError} refresh={refreshBrief} generatedAt={briefGeneratedAt} />}
+            />
+            <Route
+              path="/portfolio"
               element={<PortfolioView projects={projects} loading={loading} error={error} />}
             />
             <Route

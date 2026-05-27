@@ -195,15 +195,37 @@ function AnalyzeSection({ analyzeProjects, analyzeLoading, refreshAnalyze }) {
   );
 }
 
-// ─── Section 2: Väntande förslag ─────────────────────────────────────────────
+// ─── Section 2: Väntande förslag (improved with overall + diff + reasoning) ──
+
+function formatFieldValue(value) {
+  if (value === null || value === undefined) return '(null)';
+  if (Array.isArray(value)) {
+    // For risks: show count
+    return `${value.length} risker`;
+  }
+  if (typeof value === 'object') return JSON.stringify(value);
+  return String(value);
+}
+
+function formatDiffValue(value) {
+  if (value === null || value === undefined) return '(null)';
+  if (Array.isArray(value)) {
+    return `${value.length} risker`;
+  }
+  if (typeof value === 'object') return JSON.stringify(value);
+  const str = String(value);
+  return str.length > 100 ? str.slice(0, 100) + '…' : str;
+}
 
 function PendingSection({ pending, pendingLoading, projects, refreshAnalyze, refreshPending }) {
   const { set, get } = useActionState();
 
-  // Build title lookup from projects list
+  // Build lookup from projects list
   const titleBySlug = {};
+  const projectBySlug = {};
   (projects || []).forEach((p) => {
     titleBySlug[p.slug] = p.title || p.slug;
+    projectBySlug[p.slug] = p;
   });
 
   async function handleApprove(slug) {
@@ -245,6 +267,9 @@ function PendingSection({ pending, pendingLoading, projects, refreshAnalyze, ref
           {pending.map((item) => {
             const title = titleBySlug[item.slug] || item.slug;
             const suggestions = item.suggestions || {};
+            const reasoning = item.reasoning || {};
+            const overall = item.overall || '';
+            const currentProject = projectBySlug[item.slug] || null;
             const fields = Object.keys(suggestions);
             const analyzedAt = item.analyzed_at
               ? new Date(item.analyzed_at).toLocaleString('sv-SE', {
@@ -276,16 +301,30 @@ function PendingSection({ pending, pendingLoading, projects, refreshAnalyze, ref
                   </div>
                 </div>
 
-                {/* Diff: field → proposed value */}
+                {/* Overall motivation */}
+                {overall && (
+                  <div style={{
+                    background: 'rgba(99,102,241,0.08)',
+                    border: '1px solid rgba(99,102,241,0.2)',
+                    borderRadius: 6,
+                    padding: '8px 12px',
+                    fontSize: 12,
+                    color: 'var(--text)',
+                    lineHeight: 1.6,
+                  }}>
+                    {overall}
+                  </div>
+                )}
+
+                {/* Diff per field: current → proposed */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                   {fields.map((field) => {
-                    const value = suggestions[field];
-                    const displayValue =
-                      value === null || value === undefined
-                        ? '(null)'
-                        : typeof value === 'object'
-                        ? JSON.stringify(value)
-                        : String(value);
+                    const proposedValue = suggestions[field];
+                    // Skip updated_at in diff display
+                    if (field === 'updated_at') return null;
+
+                    const currentValue = currentProject ? currentProject[field] : undefined;
+                    const hasCurrent = currentValue !== undefined && currentValue !== null;
 
                     return (
                       <div
@@ -297,24 +336,43 @@ function PendingSection({ pending, pendingLoading, projects, refreshAnalyze, ref
                           fontSize: 12,
                         }}
                       >
-                        <span
-                          style={{
-                            color: 'var(--muted)',
-                            fontFamily: 'var(--font-mono, monospace)',
-                            marginRight: 6,
-                          }}
-                        >
-                          {field}:
-                        </span>
-                        <span
-                          style={{
-                            color: 'var(--text)',
-                            fontFamily: 'var(--font-mono, monospace)',
-                            wordBreak: 'break-word',
-                          }}
-                        >
-                          {displayValue.length > 120 ? displayValue.slice(0, 120) + '…' : displayValue}
-                        </span>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                          <span
+                            style={{
+                              color: 'var(--muted)',
+                              fontFamily: 'var(--font-mono, monospace)',
+                            }}
+                          >
+                            {field}
+                          </span>
+                          {hasCurrent && (
+                            <span
+                              style={{
+                                color: 'var(--muted)',
+                                fontFamily: 'var(--font-mono, monospace)',
+                                textDecoration: 'line-through',
+                              }}
+                            >
+                              {formatFieldValue(currentValue)}
+                            </span>
+                          )}
+                          <span style={{ color: 'var(--muted)', fontSize: 10 }}>→</span>
+                          <span
+                            style={{
+                              color: 'var(--text)',
+                              fontFamily: 'var(--font-mono, monospace)',
+                              wordBreak: 'break-word',
+                            }}
+                          >
+                            {formatDiffValue(proposedValue)}
+                          </span>
+                        </div>
+                        {/* Reasoning per field */}
+                        {reasoning[field] && (
+                          <div style={{ fontSize: 11, color: 'var(--muted)', fontStyle: 'italic', marginTop: 2 }}>
+                            {reasoning[field]}
+                          </div>
+                        )}
                       </div>
                     );
                   })}
