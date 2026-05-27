@@ -1,150 +1,4 @@
-import { useMemo } from 'react';
-import ReactFlow, {
-  Background,
-  useNodesState,
-  useEdgesState,
-  Controls,
-} from 'reactflow';
-import StatusBadge from './StatusBadge';
-import { getFamilyLabel, getFamilyColor } from '../data/labels';
-
-// ── Custom node styles (reused from landing/Pipeline.jsx) ──
-
-const nodeStyle = {
-  background: 'var(--surface)',
-  border: '1px solid var(--border)',
-  borderRadius: '8px',
-  padding: '10px 16px',
-  fontFamily: '"JetBrains Mono", monospace',
-  fontSize: '0.8rem',
-  color: 'var(--text)',
-  width: '220px',
-  minWidth: '220px',
-  maxWidth: '220px',
-  textAlign: 'center',
-  cursor: 'pointer',
-};
-
-function ProjectNode({ data }) {
-  return (
-    <div style={nodeStyle}>
-      <div style={{ fontWeight: 600, marginBottom: '4px' }}>{data.label}</div>
-      <StatusBadge status={data.status} />
-    </div>
-  );
-}
-
-function GroupNode({ data }) {
-  return (
-    <div
-      style={{
-        background: `${data.color}08`,
-        border: `1px dashed ${data.color}40`,
-        borderRadius: '12px',
-        padding: '20px 16px 16px',
-        width: '100%',
-        height: '100%',
-      }}
-    >
-      <div
-        style={{
-          fontFamily: '"JetBrains Mono", monospace',
-          fontSize: '0.7rem',
-          color: data.color,
-          letterSpacing: '0.08em',
-          textTransform: 'uppercase',
-          fontWeight: 500,
-          marginBottom: '8px',
-        }}
-      >
-        {data.label}
-      </div>
-    </div>
-  );
-}
-
-const nodeTypes = {
-  projectNode: ProjectNode,
-  groupNode: GroupNode,
-};
-
-// ── Build graph data ───────────────────────────────────────
-
-const GROUP_PADDING = 40;
-const GROUP_HEADER = 30;
-const NODE_WIDTH = 220;
-const NODE_HEIGHT = 60;
-const Y_STEP = 80;
-const X_STEP = 300;
-const BOTTOM_PADDING = 30;
-
-function buildGraphData(projects) {
-  const families = {};
-  projects.forEach((p) => {
-    if (!families[p.family]) families[p.family] = [];
-    families[p.family].push(p);
-  });
-
-  const familyKeys = Object.keys(families);
-  const nodes = [];
-
-  familyKeys.forEach((family, colIdx) => {
-    const familyProjects = families[family];
-    const familyColor = getFamilyColor(family);
-    const familyLabel = getFamilyLabel(family);
-    const groupX = colIdx * X_STEP;
-    const groupHeight = GROUP_HEADER + familyProjects.length * Y_STEP + BOTTOM_PADDING;
-
-    // Group node
-    nodes.push({
-      id: `group-${family}`,
-      type: 'groupNode',
-      position: { x: groupX, y: 0 },
-      data: { label: familyLabel, color: familyColor },
-      style: {
-        width: NODE_WIDTH + GROUP_PADDING,
-        height: groupHeight,
-        background: 'transparent',
-        border: 'none',
-      },
-      draggable: false,
-      selectable: false,
-    });
-
-    // Project nodes inside the group
-    familyProjects.forEach((project, rowIdx) => {
-      nodes.push({
-        id: project.slug,
-        type: 'projectNode',
-        position: {
-          x: groupX + GROUP_PADDING / 2,
-          y: GROUP_HEADER + rowIdx * Y_STEP,
-        },
-        data: {
-          label: project.title,
-          status: project.status,
-          slug: project.slug,
-        },
-        draggable: false,
-        selectable: true,
-      });
-    });
-  });
-
-  return { nodes, edges: [] };
-}
-
-// ── GraphView component ────────────────────────────────────
-
-export default function GraphView({ projects, onClose, onNavigate }) {
-  const { nodes: initialNodes, edges: initialEdges } = useMemo(
-    () => buildGraphData(projects),
-    [projects]
-  );
-
-  const [nodes] = useNodesState(initialNodes);
-  const [edges] = useEdgesState(initialEdges);
-
+export default function GraphView({ onClose }) {
   return (
     <div
       style={{
@@ -175,32 +29,53 @@ export default function GraphView({ projects, onClose, onNavigate }) {
         ✕ Close
       </button>
 
-      <ReactFlow
-        nodes={nodes}
-        edges={edges}
-        nodeTypes={nodeTypes}
-        fitView
-        fitViewOptions={{ padding: 0.3 }}
-        onNodeClick={(_, node) => {
-          if (node.type === 'projectNode') {
-            onNavigate(node.id);
-          }
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          height: '100%',
+          gap: '1rem',
         }}
-        panOnDrag={true}
-        zoomOnScroll={true}
-        zoomOnDoubleClick={false}
-        nodesDraggable={false}
-        nodesConnectable={false}
-        elementsSelectable={true}
-        selectNodesOnDrag={false}
-        proOptions={{ hideAttribution: true }}
       >
-        <Background color="var(--border)" gap={32} size={1} />
-        <Controls
-          showInteractive={false}
-          style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}
-        />
-      </ReactFlow>
+        <div
+          style={{
+            fontFamily: '"JetBrains Mono", monospace',
+            fontSize: '0.75rem',
+            color: 'var(--accent)',
+            letterSpacing: '0.1em',
+            textTransform: 'uppercase',
+          }}
+        >
+          Graph View
+        </div>
+        <h2
+          style={{
+            fontSize: '1.5rem',
+            fontWeight: 800,
+            color: 'var(--text)',
+            letterSpacing: '-0.02em',
+          }}
+        >
+          Coming Soon
+        </h2>
+        <p
+          style={{
+            color: 'var(--muted)',
+            fontSize: '0.9rem',
+            maxWidth: '400px',
+            textAlign: 'center',
+            lineHeight: 1.6,
+          }}
+        >
+          The dependency graph requires{' '}
+          <code style={{ color: 'var(--accent)', fontFamily: '"JetBrains Mono", monospace' }}>
+            depends_on
+          </code>{' '}
+          data in project.md and a completed family enum migration.
+        </p>
+      </div>
     </div>
   );
 }
