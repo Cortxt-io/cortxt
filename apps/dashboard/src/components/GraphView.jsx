@@ -131,6 +131,7 @@ function buildGraphData(projects, onNavigate) {
         },
         draggable: false,
         selectable: false,
+        style: { pointerEvents: 'all' },
       });
     });
   });
@@ -185,12 +186,18 @@ export default function GraphView({ projects, onClose, onNavigate }) {
         nodeTypes={nodeTypes}
         fitView
         fitViewOptions={{ padding: 0.3 }}
+        onNodeClick={(_, node) => {
+          if (node.type === 'projectNode') {
+            onNavigate(node.id);
+          }
+        }}
         panOnDrag={true}
         zoomOnScroll={true}
         zoomOnDoubleClick={false}
         nodesDraggable={false}
         nodesConnectable={false}
         elementsSelectable={false}
+        selectNodesOnDrag={false}
         proOptions={{ hideAttribution: true }}
       >
         <Background color="var(--border)" gap={32} size={1} />
