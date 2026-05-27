@@ -1,4 +1,8 @@
+import { useNavigate } from 'react-router-dom';
+
 export default function Nav({ onToggleGraph, graphOpen }) {
+  const navigate = useNavigate();
+
   return (
     <nav
       style={{
@@ -14,7 +18,18 @@ export default function Nav({ onToggleGraph, graphOpen }) {
         justifyContent: 'space-between',
       }}
     >
-      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+      <button
+        onClick={() => navigate('/')}
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '0.75rem',
+          background: 'none',
+          border: 'none',
+          cursor: 'pointer',
+          padding: 0,
+        }}
+      >
         <span
           style={{
             fontWeight: 800,
@@ -35,7 +50,7 @@ export default function Nav({ onToggleGraph, graphOpen }) {
         >
           Dashboard
         </span>
-      </div>
+      </button>
 
       <button
         onClick={onToggleGraph}

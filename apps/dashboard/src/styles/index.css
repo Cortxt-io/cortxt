@@ -120,6 +120,10 @@ a:hover { color: var(--accent-h); text-decoration: underline; }
   outline: none;
 }
 
+/* ── Dark select styling ─────────────────────────────────── */
+select { background: var(--surface); color: var(--text); border: 1px solid var(--border); }
+select option { background: var(--surface); color: var(--text); }
+
 /* ── Responsive ─────────────────────────────────────────── */
 @media (max-width: 640px) {
   .container { padding: 0 1rem; }

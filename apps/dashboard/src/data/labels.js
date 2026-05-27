@@ -19,6 +19,16 @@ export const STATUS_COLORS = {
 export const getStatusColor = (s) =>
   STATUS_COLORS[s] ?? { bg: 'bg-gray-800', text: 'text-gray-400', border: 'border-gray-600' };
 
+// ── Status colors (hex for inline styles / SVG) ──────────
+export const STATUS_HEX_COLORS = {
+  idea: '#94a3b8',
+  early_mvp: '#fbbf24',
+  mvp: '#34d399',
+  live: '#6ee7b7',
+  shelved: '#fb7185',
+};
+export const getStatusHexColor = (s) => STATUS_HEX_COLORS[s] ?? '#64748b';
+
 // ── MVP stage labels ──────────────────────────────────────
 export const STAGE_LABELS = {
   hypothesis: 'Hypothesis',
