@@ -1,10 +1,16 @@
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { marked } from 'marked';
 import useProject from '../hooks/useProject';
 import StatusBadge from './StatusBadge';
 import FamilyBadge from './FamilyBadge';
-import { getStageLabel } from '../data/labels';
+import { getStageLabel, STATUS_LABELS, STAGE_LABELS } from '../data/labels';
+import {
+  updateProject,
+  analyzeProject,
+  approveProject,
+  rejectProject,
+} from '../lib/api';
 
 marked.use({ breaks: true, gfm: true });
 
@@ -18,6 +24,93 @@ function formatSEK(n) {
   if (n == null) return '—';
   return n.toLocaleString('sv-SE') + ' kr';
 }
+
+// ─── Action button state machine ───────────────────────────────────────────
+
+function useActionState() {
+  const [states, setStates] = useState({});
+
+  const set = useCallback((key, state, errMsg) => {
+    setStates((prev) => ({ ...prev, [key]: { state, errMsg } }));
+  }, []);
+
+  const get = useCallback(
+    (key) => states[key] ?? { state: 'idle', errMsg: null },
+    [states],
+  );
+
+  return { set, get };
+}
+
+function ActionButton({ label, loadingLabel, onClick, btnState, variant = 'accent' }) {
+  const { state, errMsg } = btnState;
+
+  const baseStyle = {
+    padding: '4px 12px',
+    borderRadius: 4,
+    fontSize: 13,
+    fontFamily: 'var(--font-mono, monospace)',
+    cursor: state === 'loading' ? 'not-allowed' : 'pointer',
+    transition: 'opacity 0.15s',
+    opacity: state === 'loading' ? 0.6 : 1,
+    border: '1px solid',
+  };
+
+  const variantStyles = {
+    accent: {
+      background: 'transparent',
+      borderColor: 'var(--accent)',
+      color: 'var(--accent)',
+    },
+    success: {
+      background: 'transparent',
+      borderColor: '#34d399',
+      color: '#34d399',
+    },
+    danger: {
+      background: 'transparent',
+      borderColor: '#fb7185',
+      color: '#fb7185',
+    },
+    done: {
+      background: 'transparent',
+      borderColor: '#34d399',
+      color: '#34d399',
+    },
+    error: {
+      background: 'transparent',
+      borderColor: '#fb7185',
+      color: '#fb7185',
+    },
+  };
+
+  const displayVariant = state === 'done' ? 'done' : state === 'error' ? 'error' : variant;
+  const displayLabel =
+    state === 'loading'
+      ? loadingLabel
+      : state === 'done'
+      ? '✓ Klar'
+      : state === 'error'
+      ? 'Fel'
+      : label;
+
+  return (
+    <div>
+      <button
+        onClick={onClick}
+        disabled={state === 'loading'}
+        style={{ ...baseStyle, ...variantStyles[displayVariant] }}
+      >
+        {displayLabel}
+      </button>
+      {state === 'error' && errMsg && (
+        <div style={{ color: '#fb7185', fontSize: 11, marginTop: 3 }}>{errMsg}</div>
+      )}
+    </div>
+  );
+}
+
+// ─── File section (unchanged) ──────────────────────────────────────────────
 
 function FileSection({ name, files }) {
   const [open, setOpen] = useState(false);
@@ -59,10 +152,211 @@ function FileSection({ name, files }) {
   );
 }
 
+// ─── ProjectPendingSection (embedded, takes single pending object) ────────
+
+function formatFieldValue(value) {
+  if (value === null || value === undefined) return '(null)';
+  if (Array.isArray(value)) return `${value.length} risker`;
+  if (typeof value === 'object') return JSON.stringify(value);
+  return String(value);
+}
+
+function formatDiffValue(value) {
+  if (value === null || value === undefined) return '(null)';
+  if (Array.isArray(value)) return `${value.length} risker`;
+  if (typeof value === 'object') return JSON.stringify(value);
+  const str = String(value);
+  return str.length > 100 ? str.slice(0, 100) + '…' : str;
+}
+
+function ProjectPendingSection({ pending, meta, slug, refresh }) {
+  const { set, get } = useActionState();
+
+  async function handleAnalyze() {
+    set('analyze', 'loading', null);
+    try {
+      await analyzeProject(slug);
+      set('analyze', 'done', null);
+      refresh();
+      setTimeout(() => set('analyze', 'idle', null), 2000);
+    } catch (err) {
+      set('analyze', 'error', err.message);
+    }
+  }
+
+  async function handleApprove() {
+    set('approve', 'loading', null);
+    try {
+      await approveProject(slug);
+      set('approve', 'done', null);
+      refresh();
+      setTimeout(() => set('approve', 'idle', null), 2000);
+    } catch (err) {
+      set('approve', 'error', err.message);
+    }
+  }
+
+  async function handleReject() {
+    set('reject', 'loading', null);
+    try {
+      await rejectProject(slug);
+      set('reject', 'done', null);
+      refresh();
+      setTimeout(() => set('reject', 'idle', null), 2000);
+    } catch (err) {
+      set('reject', 'error', err.message);
+    }
+  }
+
+  const hasPending = pending && pending.suggestions && Object.keys(pending.suggestions).length > 0;
+  const suggestionCount = hasPending ? Object.keys(pending.suggestions).length : 0;
+  const analyzedAt = pending?.analyzed_at
+    ? new Date(pending.analyzed_at).toLocaleString('sv-SE', { dateStyle: 'short', timeStyle: 'short' })
+    : '—';
+
+  return (
+    <div style={{ marginBottom: '2rem' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+        <div style={{ fontSize: 12, color: 'var(--muted)', fontWeight: 600, fontFamily: 'var(--font-mono, monospace)' }}>
+          AI-FÖRSLAG {hasPending ? `(${suggestionCount})` : ''}
+        </div>
+        <ActionButton
+          label="Analysera →"
+          loadingLabel="Analyserar…"
+          onClick={handleAnalyze}
+          btnState={get('analyze')}
+          variant="accent"
+        />
+      </div>
+
+      {hasPending && (
+        <div
+          style={{
+            background: 'var(--surface)',
+            border: '1px solid var(--border)',
+            borderRadius: 8,
+            padding: 20,
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 12,
+          }}
+        >
+          <div style={{ fontSize: 11, color: 'var(--muted)', fontFamily: 'var(--font-mono, monospace)' }}>
+            Analyserad {analyzedAt} · {suggestionCount} förslag
+          </div>
+
+          {pending.overall && (
+            <div style={{
+              background: 'rgba(99,102,241,0.08)',
+              border: '1px solid rgba(99,102,241,0.2)',
+              borderRadius: 6,
+              padding: '8px 12px',
+              fontSize: 12,
+              color: 'var(--text)',
+              lineHeight: 1.6,
+            }}>
+              {pending.overall}
+            </div>
+          )}
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+            {Object.entries(pending.suggestions).map(([field, proposedValue]) => {
+              if (field === 'updated_at') return null;
+              const currentValue = meta?.[field];
+              const hasCurrent = currentValue !== undefined && currentValue !== null;
+              return (
+                <div
+                  key={field}
+                  style={{
+                    background: 'var(--bg)',
+                    borderRadius: 4,
+                    padding: '6px 10px',
+                    fontSize: 12,
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+                    <span style={{ color: 'var(--muted)', fontFamily: 'var(--font-mono, monospace)' }}>{field}</span>
+                    {hasCurrent && (
+                      <span style={{ color: 'var(--muted)', fontFamily: 'var(--font-mono, monospace)', textDecoration: 'line-through' }}>
+                        {formatFieldValue(currentValue)}
+                      </span>
+                    )}
+                    <span style={{ color: 'var(--muted)', fontSize: 10 }}>→</span>
+                    <span style={{ color: 'var(--text)', fontFamily: 'var(--font-mono, monospace)', wordBreak: 'break-word' }}>
+                      {formatDiffValue(proposedValue)}
+                    </span>
+                  </div>
+                  {pending.reasoning?.[field] && (
+                    <div style={{ fontSize: 11, color: 'var(--muted)', fontStyle: 'italic', marginTop: 2 }}>
+                      {pending.reasoning[field]}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+
+          <div style={{ display: 'flex', gap: 8, marginTop: 4 }}>
+            <ActionButton
+              label="✓ Godkänn"
+              loadingLabel="Godkänner…"
+              onClick={handleApprove}
+              btnState={get('approve')}
+              variant="success"
+            />
+            <ActionButton
+              label="✕ Avvisa"
+              loadingLabel="Avvisar…"
+              onClick={handleReject}
+              btnState={get('reject')}
+              variant="danger"
+            />
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── Main component ────────────────────────────────────────────────────────
+
 export default function ProjectDetail() {
   const { slug } = useParams();
   const navigate = useNavigate();
-  const { project, loading, error } = useProject(slug);
+  const { project, loading, error, refresh } = useProject(slug);
+  const { set, get } = useActionState();
+
+  const [status, setStatus] = useState('');
+  const [mvpStage, setMvpStage] = useState('');
+  const [currentSlice, setCurrentSlice] = useState('');
+
+  useEffect(() => {
+    if (project?.meta) {
+      setStatus(project.meta.status || '');
+      setMvpStage(project.meta.mvp_stage || '');
+      setCurrentSlice(project.meta.current_slice || '');
+    }
+  }, [slug, project?.meta?.updated]);
+
+  async function handleSave() {
+    if (!project?.meta) return;
+    const fields = {};
+    if (status !== (project.meta.status || '')) fields.status = status;
+    if (mvpStage !== (project.meta.mvp_stage || '')) fields.mvp_stage = mvpStage;
+    if (currentSlice !== (project.meta.current_slice || '')) fields.current_slice = currentSlice;
+
+    if (Object.keys(fields).length === 0) return;
+
+    set('save', 'loading', null);
+    try {
+      await updateProject(slug, fields);
+      set('save', 'done', null);
+      refresh();
+      setTimeout(() => set('save', 'idle', null), 2000);
+    } catch (err) {
+      set('save', 'error', err.message);
+    }
+  }
 
   if (loading) {
     return (
@@ -104,7 +398,7 @@ export default function ProjectDetail() {
 
   if (!project) return null;
 
-  const { meta, sections, project_files } = project;
+  const { meta, sections, project_files, pending } = project;
 
   return (
     <div className="container" style={{ paddingTop: '1.5rem', paddingBottom: '4rem' }}>
@@ -131,6 +425,96 @@ export default function ProjectDetail() {
           {getStageLabel(meta.mvp_stage)}
         </span>
       </div>
+
+      {/* Mini-brief */}
+      <div
+        style={{
+          background: 'var(--surface)',
+          border: '1px solid var(--border)',
+          borderRadius: 8,
+          padding: 20,
+          marginBottom: '2rem',
+        }}
+      >
+        <div style={{ fontSize: 12, color: 'var(--muted)', fontWeight: 600, marginBottom: 12, fontFamily: 'var(--font-mono, monospace)' }}>
+          PROJEKT-STATUS
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 16 }}>
+          <div>
+            <label style={{ fontSize: 11, color: 'var(--muted)', fontFamily: 'var(--font-mono, monospace)', display: 'block', marginBottom: 4 }}>Status</label>
+            <select
+              value={status}
+              onChange={(e) => setStatus(e.target.value)}
+              style={{
+                width: '100%',
+                padding: '6px 8px',
+                borderRadius: 4,
+                border: '1px solid var(--border)',
+                background: 'var(--bg)',
+                color: 'var(--text)',
+                fontSize: 13,
+                fontFamily: 'var(--font-mono, monospace)',
+              }}
+            >
+              {Object.keys(STATUS_LABELS).map((s) => (
+                <option key={s} value={s}>{STATUS_LABELS[s]}</option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label style={{ fontSize: 11, color: 'var(--muted)', fontFamily: 'var(--font-mono, monospace)', display: 'block', marginBottom: 4 }}>MVP-steg</label>
+            <select
+              value={mvpStage}
+              onChange={(e) => setMvpStage(e.target.value)}
+              style={{
+                width: '100%',
+                padding: '6px 8px',
+                borderRadius: 4,
+                border: '1px solid var(--border)',
+                background: 'var(--bg)',
+                color: 'var(--text)',
+                fontSize: 13,
+                fontFamily: 'var(--font-mono, monospace)',
+              }}
+            >
+              {Object.keys(STAGE_LABELS).map((s) => (
+                <option key={s} value={s}>{STAGE_LABELS[s]}</option>
+              ))}
+            </select>
+          </div>
+          <div style={{ gridColumn: '1 / -1' }}>
+            <label style={{ fontSize: 11, color: 'var(--muted)', fontFamily: 'var(--font-mono, monospace)', display: 'block', marginBottom: 4 }}>Current slice</label>
+            <textarea
+              value={currentSlice}
+              onChange={(e) => setCurrentSlice(e.target.value)}
+              rows={3}
+              style={{
+                width: '100%',
+                padding: '6px 8px',
+                borderRadius: 4,
+                border: '1px solid var(--border)',
+                background: 'var(--bg)',
+                color: 'var(--text)',
+                fontSize: 13,
+                fontFamily: 'var(--font-mono, monospace)',
+                resize: 'vertical',
+              }}
+            />
+          </div>
+        </div>
+        <div style={{ marginTop: 12, display: 'flex', justifyContent: 'flex-end' }}>
+          <ActionButton
+            label="Spara →"
+            loadingLabel="Sparar…"
+            onClick={handleSave}
+            btnState={get('save')}
+            variant="accent"
+          />
+        </div>
+      </div>
+
+      {/* Pending suggestions */}
+      <ProjectPendingSection pending={pending} meta={meta} slug={slug} refresh={refresh} />
 
       {/* Meta grid */}
       <div

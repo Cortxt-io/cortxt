@@ -75,3 +75,13 @@ export async function pushQuestToPlanning(slug, quest) {
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
   return res.json();
 }
+
+export async function updateProject(slug, fields) {
+  const res = await fetch(`${BASE}/api/project/${slug}`, {
+    method: 'PATCH',
+    headers: authHeaders(),
+    body: JSON.stringify({ fields }),
+  });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return res.json();
+}

@@ -2,7 +2,6 @@ import { useState, useCallback } from 'react';
 import { HashRouter, Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import useProjects from './hooks/useProjects';
 import usePending from './hooks/usePending';
-import useAnalyzeList from './hooks/useAnalyzeList';
 import useBrief from './hooks/useBrief';
 import Nav from './components/Nav';
 import Sidebar from './components/Sidebar';
@@ -13,12 +12,10 @@ import PortfolioView from './views/PortfolioView';
 import MetricsView from './views/MetricsView';
 import PendingView from './views/PendingView';
 import ActivityView from './views/ActivityView';
-import AnalyzeView from './views/AnalyzeView';
 
 function AppShell() {
   const { projects, loading, error } = useProjects();
   const { pending, loading: pendingLoading, error: pendingError, refresh: refreshPending } = usePending();
-  const { projects: analyzeProjects, loading: analyzeLoading, refresh: refreshAnalyze } = useAnalyzeList();
   const { brief, loading: briefLoading, error: briefError, refresh: refreshBrief, generatedAt: briefGeneratedAt } = useBrief();
   const [showGraph, setShowGraph] = useState(false);
   const navigate = useNavigate();
@@ -33,7 +30,6 @@ function AppShell() {
     { path: '/', label: 'Brief', icon: '◈' },
     { path: '/portfolio', label: 'Portfolio', icon: '⊞' },
     { path: '/metrics', label: 'Metrics', icon: '▦' },
-    { path: '/analyze', label: 'AI / Analysera', icon: '⚡', badge: pending.length },
     { path: '/activity', label: 'Activity', icon: '◎' },
   ];
 
@@ -55,7 +51,20 @@ function AppShell() {
           <Routes>
             <Route
               path="/"
-              element={<BriefView brief={brief} loading={briefLoading} error={briefError} refresh={refreshBrief} generatedAt={briefGeneratedAt} />}
+              element={
+                <BriefView
+                  brief={brief}
+                  loading={briefLoading}
+                  error={briefError}
+                  refresh={refreshBrief}
+                  generatedAt={briefGeneratedAt}
+                  pending={pending}
+                  pendingLoading={pendingLoading}
+                  projects={projects}
+                  refreshPending={refreshPending}
+                  refreshAnalyze={refreshPending}
+                />
+              }
             />
             <Route
               path="/portfolio"
@@ -65,21 +74,8 @@ function AppShell() {
               path="/metrics"
               element={<MetricsView projects={projects} />}
             />
-            <Route
-              path="/analyze"
-              element={
-                <AnalyzeView
-                  analyzeProjects={analyzeProjects}
-                  analyzeLoading={analyzeLoading}
-                  refreshAnalyze={refreshAnalyze}
-                  pending={pending}
-                  pendingLoading={pendingLoading}
-                  refreshPending={refreshPending}
-                  projects={projects}
-                />
-              }
-            />
-            {/* #/pending kept for backwards-compat, redirects to #/analyze */}
+            <Route path="/analyze" element={<Navigate to="/portfolio" replace />} />
+            {/* #/pending kept for backwards-compat, redirects to #/portfolio */}
             <Route path="/pending" element={<PendingView />} />
             <Route path="/activity" element={<ActivityView />} />
             <Route path="/project/:slug" element={<ProjectDetail />} />

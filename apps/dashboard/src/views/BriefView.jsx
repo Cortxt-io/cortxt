@@ -1,8 +1,106 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { pushQuestToPlanning, fetchActivity } from '../lib/api';
+import { pushQuestToPlanning, fetchActivity, analyzeAll, approveProject, rejectProject } from '../lib/api';
 
-export default function BriefView({ brief, loading, error, refresh, generatedAt }) {
+// ─── Action button state machine ───────────────────────────────────────────
+
+function useActionState() {
+  const [states, setStates] = useState({});
+
+  const set = useCallback((key, state, errMsg) => {
+    setStates((prev) => ({ ...prev, [key]: { state, errMsg } }));
+  }, []);
+
+  const get = useCallback(
+    (key) => states[key] ?? { state: 'idle', errMsg: null },
+    [states],
+  );
+
+  return { set, get };
+}
+
+function ActionButton({ label, loadingLabel, onClick, btnState, variant = 'accent' }) {
+  const { state, errMsg } = btnState;
+
+  const baseStyle = {
+    padding: '4px 12px',
+    borderRadius: 4,
+    fontSize: 13,
+    fontFamily: 'var(--font-mono, monospace)',
+    cursor: state === 'loading' ? 'not-allowed' : 'pointer',
+    transition: 'opacity 0.15s',
+    opacity: state === 'loading' ? 0.6 : 1,
+    border: '1px solid',
+  };
+
+  const variantStyles = {
+    accent: {
+      background: 'transparent',
+      borderColor: 'var(--accent)',
+      color: 'var(--accent)',
+    },
+    success: {
+      background: 'transparent',
+      borderColor: '#34d399',
+      color: '#34d399',
+    },
+    danger: {
+      background: 'transparent',
+      borderColor: '#fb7185',
+      color: '#fb7185',
+    },
+    done: {
+      background: 'transparent',
+      borderColor: '#34d399',
+      color: '#34d399',
+    },
+    error: {
+      background: 'transparent',
+      borderColor: '#fb7185',
+      color: '#fb7185',
+    },
+  };
+
+  const displayVariant = state === 'done' ? 'done' : state === 'error' ? 'error' : variant;
+  const displayLabel =
+    state === 'loading'
+      ? loadingLabel
+      : state === 'done'
+      ? '✓ Klar'
+      : state === 'error'
+      ? 'Fel'
+      : label;
+
+  return (
+    <div>
+      <button
+        onClick={onClick}
+        disabled={state === 'loading'}
+        style={{ ...baseStyle, ...variantStyles[displayVariant] }}
+      >
+        {displayLabel}
+      </button>
+      {state === 'error' && errMsg && (
+        <div style={{ color: '#fb7185', fontSize: 11, marginTop: 3 }}>{errMsg}</div>
+      )}
+    </div>
+  );
+}
+
+// ─── Main view ─────────────────────────────────────────────────────────────
+
+export default function BriefView({
+  brief,
+  loading,
+  error,
+  refresh,
+  generatedAt,
+  pending,
+  pendingLoading,
+  projects,
+  refreshPending,
+  refreshAnalyze,
+}) {
   const navigate = useNavigate();
   const [showQuestPrompt, setShowQuestPrompt] = useState(false);
   const [pushState, setPushState] = useState('idle');
@@ -11,6 +109,7 @@ export default function BriefView({ brief, loading, error, refresh, generatedAt 
   const [underlag, setUnderlag] = useState(null);
   const [underlagLoading, setUnderlagLoading] = useState(false);
   const [underlagError, setUnderlagError] = useState(null);
+  const { set, get } = useActionState();
 
   if (loading) {
     return (
@@ -58,6 +157,42 @@ export default function BriefView({ brief, loading, error, refresh, generatedAt 
   }
 
   const { situation, priorities, blockers, quest_suggestion, pending_recommendation } = brief;
+
+  async function handleAnalyzeAll() {
+    set('analyzeAll', 'loading', null);
+    try {
+      await analyzeAll();
+      set('analyzeAll', 'done', null);
+      refreshAnalyze();
+      setTimeout(() => set('analyzeAll', 'idle', null), 2000);
+    } catch (err) {
+      set('analyzeAll', 'error', err.message);
+    }
+  }
+
+  async function handleApprove(slug) {
+    set(`approve_${slug}`, 'loading', null);
+    try {
+      await approveProject(slug);
+      set(`approve_${slug}`, 'done', null);
+      refreshPending();
+      refreshAnalyze();
+    } catch (err) {
+      set(`approve_${slug}`, 'error', err.message);
+    }
+  }
+
+  async function handleReject(slug) {
+    set(`reject_${slug}`, 'loading', null);
+    try {
+      await rejectProject(slug);
+      set(`reject_${slug}`, 'done', null);
+      refreshPending();
+      refreshAnalyze();
+    } catch (err) {
+      set(`reject_${slug}`, 'error', err.message);
+    }
+  }
 
   function buildQuestPrompt() {
     if (!quest_suggestion) return '';
@@ -137,6 +272,13 @@ export default function BriefView({ brief, loading, error, refresh, generatedAt 
               {formatGeneratedAt()}
             </span>
           )}
+          <ActionButton
+            label="Analysera alla →"
+            loadingLabel="Analyserar…"
+            onClick={handleAnalyzeAll}
+            btnState={get('analyzeAll')}
+            variant="accent"
+          />
           <button onClick={refresh} style={{ padding: '6px 14px', borderRadius: 4, fontSize: 13, fontFamily: 'var(--font-mono, monospace)', cursor: 'pointer', background: 'transparent', border: '1px solid var(--accent)', color: 'var(--accent)' }}>
             Generera ny ↻
           </button>
@@ -286,6 +428,35 @@ export default function BriefView({ brief, loading, error, refresh, generatedAt 
           <div style={{ fontSize: 12, color: 'var(--muted)', fontWeight: 600, marginBottom: 12, fontFamily: 'var(--font-mono, monospace)' }}>PENDING-REKOMMENDATION</div>
           <div style={{ background: 'rgba(99,102,241,0.06)', border: '1px solid rgba(99,102,241,0.15)', borderRadius: 6, padding: '12px 16px', fontSize: 13, color: 'var(--text)', lineHeight: 1.6 }}>
             {pending_recommendation}
+          </div>
+        </div>
+      )}
+
+      {/* Compact pending list */}
+      {pending && pending.length > 0 && (
+        <div style={{ marginBottom: 24 }}>
+          <div style={{ fontSize: 12, color: 'var(--muted)', fontWeight: 600, marginBottom: 12, fontFamily: 'var(--font-mono, monospace)' }}>
+            VÄNTANDE FÖRSLAG ({pending.length})
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            {pending.map((item) => {
+              const title = (projects || []).find(p => p.slug === item.slug)?.title || item.slug;
+              const count = Object.keys(item.suggestions || {}).length;
+              return (
+                <div key={item.slug} style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 8, padding: '12px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <div>
+                    <div style={{ fontWeight: 600, fontSize: 14, color: 'var(--text)' }}>{title}</div>
+                    <div style={{ fontSize: 11, color: 'var(--muted)', fontFamily: 'var(--font-mono, monospace)' }}>
+                      {item.analyzed_at ? new Date(item.analyzed_at).toLocaleString('sv-SE', { dateStyle: 'short', timeStyle: 'short' }) : '—'} · {count} förslag
+                    </div>
+                  </div>
+                  <div style={{ display: 'flex', gap: 8 }}>
+                    <ActionButton label="✓ Godkänn" loadingLabel="Godkänner…" onClick={() => handleApprove(item.slug)} btnState={get(`approve_${item.slug}`)} variant="success" />
+                    <ActionButton label="✕ Avvisa" loadingLabel="Avvisar…" onClick={() => handleReject(item.slug)} btnState={get(`reject_${item.slug}`)} variant="danger" />
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
       )}

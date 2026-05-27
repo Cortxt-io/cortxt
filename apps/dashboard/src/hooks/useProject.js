@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
 const API = 'https://project-cns-production.up.railway.app';
 
@@ -6,6 +6,8 @@ export default function useProject(slug) {
   const [project, setProject] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [tick, setTick] = useState(0);
+  const refresh = useCallback(() => setTick((t) => t + 1), []);
 
   useEffect(() => {
     if (!slug) return;
@@ -39,7 +41,7 @@ export default function useProject(slug) {
 
     fetchProject();
     return () => { cancelled = true; };
-  }, [slug]);
+  }, [slug, tick]);
 
-  return { project, loading, error };
+  return { project, loading, error, refresh };
 }
