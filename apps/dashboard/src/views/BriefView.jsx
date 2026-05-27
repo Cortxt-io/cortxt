@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { pushQuestToPlanning, fetchActivity } from '../lib/api';
 
 export default function BriefView({ brief, loading, error, refresh, generatedAt }) {
   const navigate = useNavigate();
@@ -111,6 +112,56 @@ export default function BriefView({ brief, loading, error, refresh, generatedAt 
     }
   }
 
+  const [pushState, setPushState] = useState('idle');
+  const [pushError, setPushError] = useState(null);
+  const [showUnderlag, setShowUnderlag] = useState(false);
+  const [underlag, setUnderlag] = useState(null);
+  const [underlagLoading, setUnderlagLoading] = useState(false);
+  const [underlagError, setUnderlagError] = useState(null);
+
+  async function handlePushToPlanning() {
+    if (!quest_suggestion || !quest_suggestion.target_slug) return;
+    setPushState('loading');
+    setPushError(null);
+    const today = new Date().toISOString().split('T')[0];
+    try {
+      await pushQuestToPlanning(quest_suggestion.target_slug, {
+        title: quest_suggestion.title,
+        description: quest_suggestion.description,
+        estimated_impact: quest_suggestion.estimated_impact,
+        source: 'portfolio-brief',
+        created_at: today,
+      });
+      setPushState('done');
+      setTimeout(() => setPushState('idle'), 2000);
+    } catch (err) {
+      setPushState('error');
+      setPushError(err.message);
+    }
+  }
+
+  async function handleToggleUnderlag() {
+    const next = !showUnderlag;
+    setShowUnderlag(next);
+    if (next && underlag === null && !underlagLoading) {
+      setUnderlagLoading(true);
+      setUnderlagError(null);
+      try {
+        const data = await fetchActivity();
+        setUnderlag({
+          devwatchEvents: data.devwatch_events ?? [],
+          devwatchDate: data.devwatch_date ?? '',
+          devlogHtml: data.devlog_html ?? '',
+          devlogDate: data.devlog_date ?? '',
+        });
+      } catch (err) {
+        setUnderlagError(err.message);
+      } finally {
+        setUnderlagLoading(false);
+      }
+    }
+  }
+
   return (
     <div style={{ padding: 32, maxWidth: 1100 }}>
       {/* Header */}
@@ -178,21 +229,43 @@ export default function BriefView({ brief, loading, error, refresh, generatedAt 
               <span style={{ fontWeight: 600 }}>Mål:</span> {quest_suggestion.target_slug}
               <span style={{ marginLeft: 12, fontWeight: 600 }}>Impact:</span> {quest_suggestion.estimated_impact}
             </div>
-            <button
-              onClick={() => setShowQuestPrompt(!showQuestPrompt)}
-              style={{
-                padding: '4px 12px',
-                borderRadius: 4,
-                fontSize: 12,
-                fontFamily: 'var(--font-mono, monospace)',
-                cursor: 'pointer',
-                background: 'transparent',
-                border: '1px solid var(--accent)',
-                color: 'var(--accent)',
-              }}
-            >
-              {showQuestPrompt ? 'Dölj prompt' : 'Förbered quest-prompt →'}
-            </button>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+              <button
+                onClick={() => setShowQuestPrompt(!showQuestPrompt)}
+                style={{
+                  padding: '4px 12px',
+                  borderRadius: 4,
+                  fontSize: 12,
+                  fontFamily: 'var(--font-mono, monospace)',
+                  cursor: 'pointer',
+                  background: 'transparent',
+                  border: '1px solid var(--accent)',
+                  color: 'var(--accent)',
+                }}
+              >
+                {showQuestPrompt ? 'Dölj prompt' : 'Förbered quest-prompt →'}
+              </button>
+              <button
+                onClick={handlePushToPlanning}
+                disabled={pushState === 'loading'}
+                style={{
+                  padding: '4px 12px',
+                  borderRadius: 4,
+                  fontSize: 12,
+                  fontFamily: 'var(--font-mono, monospace)',
+                  cursor: pushState === 'loading' ? 'not-allowed' : 'pointer',
+                  background: 'transparent',
+                  border: `1px solid ${pushState === 'done' ? '#34d399' : pushState === 'error' ? '#fb7185' : 'var(--accent)'}`,
+                  color: pushState === 'done' ? '#34d399' : pushState === 'error' ? '#fb7185' : 'var(--accent)',
+                  opacity: pushState === 'loading' ? 0.6 : 1,
+                }}
+              >
+                {pushState === 'loading' ? 'Sparar…' : pushState === 'done' ? '✓ Sparad' : pushState === 'error' ? 'Fel' : 'Spara till planning →'}
+              </button>
+              {pushError && (
+                <div style={{ fontSize: 11, color: '#fb7185', width: '100%' }}>{pushError}</div>
+              )}
+            </div>
           </div>
         )}
       </div>
@@ -239,6 +312,143 @@ export default function BriefView({ brief, loading, error, refresh, generatedAt 
           }}>
             {buildQuestPrompt()}
           </pre>
+        </div>
+      )}
+
+      {/* Underlag toggle */}
+      <div style={{ marginBottom: 24 }}>
+        <button
+          onClick={handleToggleUnderlag}
+          style={{
+            padding: '4px 12px',
+            borderRadius: 4,
+            fontSize: 12,
+            fontFamily: 'var(--font-mono, monospace)',
+            cursor: 'pointer',
+            background: 'transparent',
+            border: '1px solid var(--muted)',
+            color: 'var(--muted)',
+          }}
+        >
+          {showUnderlag ? 'Dölj underlag ↓' : 'Visa underlag →'}
+        </button>
+      </div>
+
+      {/* Underlag expandable */}
+      {showUnderlag && (
+        <div style={{
+          background: 'var(--surface)',
+          border: '1px solid var(--border)',
+          borderRadius: 8,
+          padding: 20,
+          marginBottom: 24,
+        }}>
+          <div style={{ fontSize: 12, color: 'var(--muted)', fontWeight: 600, marginBottom: 16, fontFamily: 'var(--font-mono, monospace)' }}>
+            UNDERLAG
+          </div>
+
+          {underlagLoading && (
+            <div style={{ fontSize: 13, color: 'var(--muted)' }}>Laddar underlag…</div>
+          )}
+          {underlagError && (
+            <div style={{ fontSize: 13, color: '#fb7185' }}>{underlagError}</div>
+          )}
+
+          {!underlagLoading && !underlagError && underlag && (
+            <>
+              {/* Devlog */}
+              {underlag.devlogHtml && (
+                <div style={{ marginBottom: 20 }}>
+                  <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginBottom: 8 }}>
+                    <span style={{ fontSize: 12, color: 'var(--muted)', fontWeight: 600, fontFamily: 'var(--font-mono, monospace)' }}>Devlog</span>
+                    {underlag.devlogDate && (
+                      <span style={{ fontSize: 11, color: 'var(--muted)', fontFamily: 'var(--font-mono, monospace)' }}>{underlag.devlogDate}</span>
+                    )}
+                  </div>
+                  <div
+                    className="prose"
+                    style={{
+                      background: 'var(--bg)',
+                      border: '1px solid var(--border)',
+                      borderRadius: 8,
+                      padding: 16,
+                      fontSize: 14,
+                      color: 'var(--text)',
+                      lineHeight: 1.6,
+                    }}
+                    dangerouslySetInnerHTML={{ __html: underlag.devlogHtml }}
+                  />
+                </div>
+              )}
+
+              {/* Devwatch events */}
+              {underlag.devwatchEvents.length > 0 && (
+                <div>
+                  <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginBottom: 8 }}>
+                    <span style={{ fontSize: 12, color: 'var(--muted)', fontWeight: 600, fontFamily: 'var(--font-mono, monospace)' }}>Devwatch-events</span>
+                    {underlag.devwatchDate && (
+                      <span style={{ fontSize: 11, color: 'var(--muted)', fontFamily: 'var(--font-mono, monospace)' }}>{underlag.devwatchDate}</span>
+                    )}
+                  </div>
+                  <div style={{
+                    background: 'var(--bg)',
+                    border: '1px solid var(--border)',
+                    borderRadius: 8,
+                    overflow: 'hidden',
+                  }}>
+                    {underlag.devwatchEvents.map((event, idx) => {
+                      const meta = event.meta || {};
+                      const slug = meta.slug || event.source?.id || '';
+                      const projectTitle = meta.project_title || event.source?.name || slug;
+                      const changedFields = meta.changed_fields || [];
+                      const changedFiles = (meta.changed_files || []).map(f => f.file || f);
+                      return (
+                        <div
+                          key={event.id || idx}
+                          style={{
+                            padding: '12px 16px',
+                            borderBottom: idx < underlag.devwatchEvents.length - 1 ? '1px solid var(--border)' : 'none',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: 4,
+                          }}
+                        >
+                          <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
+                            <button
+                              onClick={() => navigate(`/project/${slug}`)}
+                              style={{
+                                fontWeight: 600,
+                                fontSize: 14,
+                                color: 'var(--accent)',
+                                cursor: 'pointer',
+                                background: 'none',
+                                border: 'none',
+                                padding: 0,
+                                fontFamily: 'inherit',
+                              }}
+                            >
+                              {projectTitle}
+                            </button>
+                            <span style={{ fontSize: 11, color: 'var(--muted)', fontFamily: 'var(--font-mono, monospace)' }}>[{slug}]</span>
+                          </div>
+                          {changedFields.length > 0 && (
+                            <div style={{ fontSize: 12, color: 'var(--muted)' }}>Ändrade fält: {changedFields.join(', ')}</div>
+                          )}
+                          {changedFiles.length > 0 && (
+                            <div style={{ fontSize: 12, color: 'var(--muted)' }}>Ändrade filer: {changedFiles.join(', ')}</div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {!underlag.devlogHtml && underlag.devwatchEvents.length === 0 && (
+                <div style={{ fontSize: 13, color: 'var(--muted)' }}>Inget underlag tillgängligt.</div>
+              )}
+            </>
+          )}
         </div>
       )}
 
