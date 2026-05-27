@@ -1,9 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
+import { fetchAnalyzeList } from '../lib/api';
 
-const API = 'https://project-cns-production.up.railway.app';
-
-export default function usePending() {
-  const [pending, setPending] = useState([]);
+export default function useAnalyzeList() {
+  const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [tick, setTick] = useState(0);
@@ -14,28 +13,26 @@ export default function usePending() {
     let cancelled = false;
     setLoading(true);
 
-    async function fetchPending() {
+    async function load() {
       try {
-        const res = await fetch(`${API}/api/pending`);
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const data = await res.json();
+        const data = await fetchAnalyzeList();
         if (!cancelled) {
-          setPending(data.pending ?? []);
+          setProjects(data.projects ?? []);
           setError(null);
         }
       } catch (err) {
         if (!cancelled) {
           setError(err.message);
-          setPending([]);
+          setProjects([]);
         }
       } finally {
         if (!cancelled) setLoading(false);
       }
     }
 
-    fetchPending();
+    load();
     return () => { cancelled = true; };
   }, [tick]);
 
-  return { pending, loading, error, refresh };
+  return { projects, loading, error, refresh };
 }

@@ -1,7 +1,8 @@
 import { useState, useCallback } from 'react';
-import { HashRouter, Routes, Route, useNavigate, useLocation } from 'react-router-dom';
+import { HashRouter, Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import useProjects from './hooks/useProjects';
 import usePending from './hooks/usePending';
+import useAnalyzeList from './hooks/useAnalyzeList';
 import Nav from './components/Nav';
 import Sidebar from './components/Sidebar';
 import GraphView from './components/GraphView';
@@ -10,10 +11,12 @@ import PortfolioView from './views/PortfolioView';
 import MetricsView from './views/MetricsView';
 import PendingView from './views/PendingView';
 import ActivityView from './views/ActivityView';
+import AnalyzeView from './views/AnalyzeView';
 
 function AppShell() {
   const { projects, loading, error } = useProjects();
-  const { pending, loading: pendingLoading, error: pendingError } = usePending();
+  const { pending, loading: pendingLoading, error: pendingError, refresh: refreshPending } = usePending();
+  const { projects: analyzeProjects, loading: analyzeLoading, refresh: refreshAnalyze } = useAnalyzeList();
   const [showGraph, setShowGraph] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
@@ -26,7 +29,7 @@ function AppShell() {
   const navItems = [
     { path: '/', label: 'Portfolio', icon: '⊞' },
     { path: '/metrics', label: 'Metrics', icon: '▦' },
-    { path: '/pending', label: 'AI / Pending', icon: '⚡', badge: pending.length },
+    { path: '/analyze', label: 'AI / Analysera', icon: '⚡', badge: pending.length },
     { path: '/activity', label: 'Activity', icon: '◎' },
   ];
 
@@ -55,16 +58,21 @@ function AppShell() {
               element={<MetricsView projects={projects} />}
             />
             <Route
-              path="/pending"
+              path="/analyze"
               element={
-                <PendingView
-                  projects={projects}
+                <AnalyzeView
+                  analyzeProjects={analyzeProjects}
+                  analyzeLoading={analyzeLoading}
+                  refreshAnalyze={refreshAnalyze}
                   pending={pending}
                   pendingLoading={pendingLoading}
-                  pendingError={pendingError}
+                  refreshPending={refreshPending}
+                  projects={projects}
                 />
               }
             />
+            {/* #/pending kept for backwards-compat, redirects to #/analyze */}
+            <Route path="/pending" element={<PendingView />} />
             <Route path="/activity" element={<ActivityView />} />
             <Route path="/project/:slug" element={<ProjectDetail />} />
           </Routes>
