@@ -85,3 +85,30 @@ export async function updateProject(slug, fields) {
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
   return res.json();
 }
+
+export async function runDevwatch() {
+  const res = await fetch(`${BASE}/api/devwatch/run`, {
+    method: 'POST',
+    headers: authHeaders(),
+  });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return res.json();
+}
+
+export async function runDevlog() {
+  const res = await fetch(`${BASE}/api/devlog/run`, {
+    method: 'POST',
+    headers: authHeaders(),
+  });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return res.json();
+}
+
+export async function runUpdate() {
+  const res = await fetch(`${BASE}/api/update/run`, {
+    method: 'POST',
+    headers: authHeaders(),
+  });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return res.json();
+}

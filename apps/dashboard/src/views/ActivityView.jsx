@@ -1,9 +1,138 @@
+import { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import useActivity from '../hooks/useActivity';
+import { runDevwatch, runDevlog, runUpdate } from '../lib/api';
+
+function useActionState() {
+  const [states, setStates] = useState({});
+
+  const set = useCallback((key, state, errMsg) => {
+    setStates((prev) => ({ ...prev, [key]: { state, errMsg } }));
+  }, []);
+
+  const get = useCallback(
+    (key) => states[key] ?? { state: 'idle', errMsg: null },
+    [states],
+  );
+
+  return { set, get };
+}
+
+function ActionButton({ label, loadingLabel, onClick, btnState, variant = 'accent' }) {
+  const { state, errMsg } = btnState;
+
+  const baseStyle = {
+    padding: '4px 12px',
+    borderRadius: 4,
+    fontSize: 13,
+    fontFamily: 'var(--font-mono, monospace)',
+    cursor: state === 'loading' ? 'not-allowed' : 'pointer',
+    transition: 'opacity 0.15s',
+    opacity: state === 'loading' ? 0.6 : 1,
+    border: '1px solid',
+  };
+
+  const variantStyles = {
+    accent: {
+      background: 'transparent',
+      borderColor: 'var(--accent)',
+      color: 'var(--accent)',
+    },
+    muted: {
+      background: 'transparent',
+      borderColor: 'var(--muted)',
+      color: 'var(--muted)',
+    },
+    done: {
+      background: 'transparent',
+      borderColor: '#34d399',
+      color: '#34d399',
+    },
+    error: {
+      background: 'transparent',
+      borderColor: '#fb7185',
+      color: '#fb7185',
+    },
+  };
+
+  const displayVariant = state === 'done' ? 'done' : state === 'error' ? 'error' : variant;
+  const displayLabel =
+    state === 'loading'
+      ? loadingLabel
+      : state === 'done'
+      ? '✓ Klar'
+      : state === 'error'
+      ? 'Fel'
+      : label;
+
+  return (
+    <div style={{ display: 'inline-block' }}>
+      <button
+        onClick={onClick}
+        disabled={state === 'loading'}
+        style={{ ...baseStyle, ...variantStyles[displayVariant] }}
+      >
+        {displayLabel}
+      </button>
+      {state === 'error' && errMsg && (
+        <div style={{ color: '#fb7185', fontSize: 11, marginTop: 3 }}>{errMsg}</div>
+      )}
+    </div>
+  );
+}
 
 export default function ActivityView() {
   const navigate = useNavigate();
-  const { devwatchEvents, devwatchDate, devlogHtml, devlogDate, hasActivity, loading, error } = useActivity();
+  const { devwatchEvents, devwatchDate, devlogHtml, devlogDate, hasActivity, loading, error, refresh } = useActivity();
+  const { set, get } = useActionState();
+
+  async function handleRunUpdate() {
+    set('updateAll', 'loading', null);
+    try {
+      const result = await runUpdate();
+      if (result.status === 'error') {
+        set('updateAll', 'error', result.message);
+      } else {
+        set('updateAll', 'done', null);
+        refresh();
+        setTimeout(() => set('updateAll', 'idle', null), 2000);
+      }
+    } catch (err) {
+      set('updateAll', 'error', err.message);
+    }
+  }
+
+  async function handleRunDevwatch() {
+    set('devwatch', 'loading', null);
+    try {
+      const result = await runDevwatch();
+      if (result.status === 'error') {
+        set('devwatch', 'error', result.message);
+      } else {
+        set('devwatch', 'done', null);
+        refresh();
+        setTimeout(() => set('devwatch', 'idle', null), 2000);
+      }
+    } catch (err) {
+      set('devwatch', 'error', err.message);
+    }
+  }
+
+  async function handleRunDevlog() {
+    set('devlog', 'loading', null);
+    try {
+      const result = await runDevlog();
+      if (result.status === 'error') {
+        set('devlog', 'error', result.message);
+      } else {
+        set('devlog', 'done', null);
+        refresh();
+        setTimeout(() => set('devlog', 'idle', null), 2000);
+      }
+    } catch (err) {
+      set('devlog', 'error', err.message);
+    }
+  }
 
   if (loading) {
     return (
@@ -26,9 +155,20 @@ export default function ActivityView() {
   if (!hasActivity) {
     return (
       <div style={{ padding: 32, maxWidth: 1100 }}>
-        <h1 style={{ margin: '0 0 32px', fontSize: 22, color: 'var(--text)' }}>Activity</h1>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 32 }}>
+          <h1 style={{ margin: 0, fontSize: 22, color: 'var(--text)' }}>Activity</h1>
+          <div style={{ display: 'flex', gap: 8 }}>
+            <ActionButton
+              label="Uppdatera allt"
+              loadingLabel="Kör…"
+              onClick={handleRunUpdate}
+              btnState={get('updateAll')}
+              variant="accent"
+            />
+          </div>
+        </div>
         <p style={{ color: 'var(--muted)', fontSize: 14, lineHeight: 1.6, maxWidth: 500 }}>
-          Ingen aktivitet registrerad ännu. Devwatch och devlog körs automatiskt dagligen via GitHub Actions.
+          Ingen aktivitet registrerad ännu. Kör "Uppdatera allt" för att generera devwatch- och devlog-data, eller vänta på daglig GitHub Actions-körning.
         </p>
       </div>
     );
@@ -45,7 +185,32 @@ export default function ActivityView() {
 
   return (
     <div style={{ padding: 32, maxWidth: 1100 }}>
-      <h1 style={{ margin: '0 0 32px', fontSize: 22, color: 'var(--text)' }}>Activity</h1>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 32 }}>
+        <h1 style={{ margin: 0, fontSize: 22, color: 'var(--text)' }}>Activity</h1>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <ActionButton
+            label="Uppdatera allt"
+            loadingLabel="Kör…"
+            onClick={handleRunUpdate}
+            btnState={get('updateAll')}
+            variant="accent"
+          />
+          <ActionButton
+            label="Devwatch"
+            loadingLabel="Kör…"
+            onClick={handleRunDevwatch}
+            btnState={get('devwatch')}
+            variant="muted"
+          />
+          <ActionButton
+            label="Devlog"
+            loadingLabel="Kör…"
+            onClick={handleRunDevlog}
+            btnState={get('devlog')}
+            variant="muted"
+          />
+        </div>
+      </div>
 
       {/* Section 1: Daily summary */}
       {devlogHtml && (

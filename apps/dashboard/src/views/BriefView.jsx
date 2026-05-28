@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { pushQuestToPlanning, fetchActivity, analyzeAll, approveProject, rejectProject } from '../lib/api';
+import { pushQuestToPlanning, fetchActivity, analyzeAll, approveProject, rejectProject, runUpdate } from '../lib/api';
 
 // ─── Action button state machine ───────────────────────────────────────────
 
@@ -261,6 +261,35 @@ export default function BriefView({
     }
   }
 
+  async function handleRunUpdate() {
+    set('runUpdate', 'loading', null);
+    try {
+      const result = await runUpdate();
+      if (result.status === 'error') {
+        set('runUpdate', 'error', result.message);
+      } else {
+        set('runUpdate', 'done', null);
+        // Refresh underlag if visible
+        if (showUnderlag) {
+          setUnderlagLoading(true);
+          try {
+            const data = await fetchActivity();
+            setUnderlag({
+              devwatchEvents: data.devwatch_events ?? [],
+              devwatchDate: data.devwatch_date ?? '',
+              devlogHtml: data.devlog_html ?? '',
+              devlogDate: data.devlog_date ?? '',
+            });
+          } catch { /* keep existing underlag */ }
+          finally { setUnderlagLoading(false); }
+        }
+        setTimeout(() => set('runUpdate', 'idle', null), 2000);
+      }
+    } catch (err) {
+      set('runUpdate', 'error', err.message);
+    }
+  }
+
   return (
     <div style={{ padding: 32, maxWidth: 1100 }}>
       {/* Header */}
@@ -332,10 +361,17 @@ export default function BriefView({
       )}
 
       {/* Underlag toggle */}
-      <div style={{ marginBottom: 24 }}>
+      <div style={{ marginBottom: 24, display: 'flex', alignItems: 'center', gap: 8 }}>
         <button onClick={handleToggleUnderlag} style={{ padding: '4px 12px', borderRadius: 4, fontSize: 12, fontFamily: 'var(--font-mono, monospace)', cursor: 'pointer', background: 'transparent', border: '1px solid var(--muted)', color: 'var(--muted)' }}>
           {showUnderlag ? 'Dölj underlag ↓' : 'Visa underlag →'}
         </button>
+        <ActionButton
+          label="Uppdatera underlag ↻"
+          loadingLabel="Kör…"
+          onClick={handleRunUpdate}
+          btnState={get('runUpdate')}
+          variant="muted"
+        />
       </div>
 
       {/* Underlag */}
