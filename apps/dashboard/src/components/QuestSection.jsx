@@ -16,6 +16,7 @@ export default function QuestSection({ slug, projects }) {
 
   const active = quests.filter((q) => q.status === 'active' || q.status === 'in_progress');
   const completed = quests.filter((q) => q.status === 'completed').slice(0, 3);
+  // archived quests are never shown in QuestSection
 
   async function handleCreate() {
     if (!formTitle.trim()) return;

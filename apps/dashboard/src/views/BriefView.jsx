@@ -246,26 +246,27 @@ export default function BriefView({
         </div>
       </div>
 
-      {/* Active quest banner */}
-      {inProgressQuest && (
-        <div
-          onClick={() => navigate(`/quest/${inProgressQuest.id}`)}
-          style={{
-            background: 'rgba(251,191,36,0.08)',
-            border: '1px solid rgba(251,191,36,0.2)',
-            borderRadius: 8,
-            padding: '10px 16px',
-            marginBottom: 20,
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            gap: 8,
-          }}
-        >
-          <span style={{ fontSize: 14 }}>⚡</span>
-          <span style={{ fontSize: 13, color: 'var(--text)' }}>Pågående quest: </span>
-          <span style={{ fontSize: 13, color: '#fbbf24', fontWeight: 600 }}>{inProgressQuest.title}</span>
-          <span style={{ fontSize: 12, color: 'var(--muted)', fontFamily: 'var(--font-mono, monospace)' }}>→</span>
+      {/* Qoder arbetar på-banner */}
+      {inProgressQuests.length > 0 && (
+        <div style={{
+          background: 'rgba(251,191,36,0.08)',
+          border: '1px solid rgba(251,191,36,0.2)',
+          borderRadius: 6,
+          padding: '8px 14px',
+          marginBottom: 16,
+          fontSize: 12,
+          color: '#fbbf24',
+          fontFamily: 'var(--font-mono, monospace)',
+          display: 'flex',
+          alignItems: 'center',
+          gap: 8,
+        }}>
+          <span>⚡</span>
+          <span>Pågående: {inProgressQuests.map(q => q.title).join(', ')}</span>
+          <button onClick={() => navigate('/quests')} style={{
+            marginLeft: 'auto', background: 'none', border: 'none',
+            color: '#fbbf24', cursor: 'pointer', fontSize: 12,
+          }}>Se quests →</button>
         </div>
       )}
 

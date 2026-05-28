@@ -33,6 +33,14 @@ export default function QuestBoardView({ projects }) {
     return map;
   }, [filtered]);
 
+  const hasInProgress = quests.some((q) => q.status === 'in_progress');
+
+  useEffect(() => {
+    if (!hasInProgress) return;
+    const interval = setInterval(refresh, 15000);
+    return () => clearInterval(interval);
+  }, [hasInProgress, refresh]);
+
   if (loading) {
     return (
       <div style={{ padding: 32, maxWidth: 1200 }}>
