@@ -112,3 +112,76 @@ export async function runUpdate() {
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
   return res.json();
 }
+
+// ── Quest lifecycle API ──────────────────────────────────────────────────
+
+// No auth — quests are readable
+export async function fetchQuests(filters = {}) {
+  const params = new URLSearchParams();
+  if (filters.status) params.set('status', filters.status);
+  if (filters.slug) params.set('slug', filters.slug);
+  const qs = params.toString() ? `?${params.toString()}` : '';
+  const res = await fetch(`${BASE}/api/quests${qs}`);
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return res.json();
+}
+
+export async function fetchQuest(id) {
+  const res = await fetch(`${BASE}/api/quests/${id}`);
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return res.json();
+}
+
+export async function createQuest(payload) {
+  const res = await fetch(`${BASE}/api/quests`, {
+    method: 'POST',
+    headers: authHeaders(),
+    body: JSON.stringify(payload),
+  });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return res.json();
+}
+
+export async function activateQuest(id) {
+  const res = await fetch(`${BASE}/api/quests/${id}/activate`, {
+    method: 'POST',
+    headers: authHeaders(),
+  });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return res.json();
+}
+
+export async function completeQuest(id, summary) {
+  const body = summary ? { result_summary: summary } : {};
+  const res = await fetch(`${BASE}/api/quests/${id}/complete`, {
+    method: 'POST',
+    headers: authHeaders(),
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return res.json();
+}
+
+export async function archiveQuest(id) {
+  const res = await fetch(`${BASE}/api/quests/${id}/archive`, {
+    method: 'POST',
+    headers: authHeaders(),
+  });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return res.json();
+}
+
+export async function promoteBriefQuest(suggestion) {
+  const res = await fetch(`${BASE}/api/quests/from-brief`, {
+    method: 'POST',
+    headers: authHeaders(),
+    body: JSON.stringify({
+      slug: suggestion.target_slug,
+      title: suggestion.title,
+      description: suggestion.description,
+      estimated_impact: suggestion.estimated_impact,
+    }),
+  });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return res.json();
+}

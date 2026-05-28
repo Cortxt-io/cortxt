@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import StatusBadge from './StatusBadge';
 import FamilyBadge from './FamilyBadge';
+import LayerBadge from './LayerBadge';
 import { getStageLabel } from '../data/labels';
 
 function roiColor(value) {
@@ -23,6 +24,7 @@ export default function ProjectCard({ project }) {
       {/* Badges */}
       <div className="flex flex-wrap items-center gap-2 mb-2">
         <StatusBadge status={project.status} />
+        <LayerBadge layer={project.layer} />
         <FamilyBadge family={project.family} />
       </div>
 

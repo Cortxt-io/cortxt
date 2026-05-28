@@ -1,91 +1,9 @@
 import { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { pushQuestToPlanning, fetchActivity, analyzeAll, approveProject, rejectProject, runUpdate } from '../lib/api';
-
-// ─── Action button state machine ───────────────────────────────────────────
-
-function useActionState() {
-  const [states, setStates] = useState({});
-
-  const set = useCallback((key, state, errMsg) => {
-    setStates((prev) => ({ ...prev, [key]: { state, errMsg } }));
-  }, []);
-
-  const get = useCallback(
-    (key) => states[key] ?? { state: 'idle', errMsg: null },
-    [states],
-  );
-
-  return { set, get };
-}
-
-function ActionButton({ label, loadingLabel, onClick, btnState, variant = 'accent' }) {
-  const { state, errMsg } = btnState;
-
-  const baseStyle = {
-    padding: '4px 12px',
-    borderRadius: 4,
-    fontSize: 13,
-    fontFamily: 'var(--font-mono, monospace)',
-    cursor: state === 'loading' ? 'not-allowed' : 'pointer',
-    transition: 'opacity 0.15s',
-    opacity: state === 'loading' ? 0.6 : 1,
-    border: '1px solid',
-  };
-
-  const variantStyles = {
-    accent: {
-      background: 'transparent',
-      borderColor: 'var(--accent)',
-      color: 'var(--accent)',
-    },
-    success: {
-      background: 'transparent',
-      borderColor: '#34d399',
-      color: '#34d399',
-    },
-    danger: {
-      background: 'transparent',
-      borderColor: '#fb7185',
-      color: '#fb7185',
-    },
-    done: {
-      background: 'transparent',
-      borderColor: '#34d399',
-      color: '#34d399',
-    },
-    error: {
-      background: 'transparent',
-      borderColor: '#fb7185',
-      color: '#fb7185',
-    },
-  };
-
-  const displayVariant = state === 'done' ? 'done' : state === 'error' ? 'error' : variant;
-  const displayLabel =
-    state === 'loading'
-      ? loadingLabel
-      : state === 'done'
-      ? '✓ Klar'
-      : state === 'error'
-      ? 'Fel'
-      : label;
-
-  return (
-    <div>
-      <button
-        onClick={onClick}
-        disabled={state === 'loading'}
-        style={{ ...baseStyle, ...variantStyles[displayVariant] }}
-      >
-        {displayLabel}
-      </button>
-      {state === 'error' && errMsg && (
-        <div style={{ color: '#fb7185', fontSize: 11, marginTop: 3 }}>{errMsg}</div>
-      )}
-    </div>
-  );
-}
+import { pushQuestToPlanning, fetchActivity, analyzeAll, approveProject, rejectProject, runUpdate, promoteBriefQuest } from '../lib/api';
+import useActionState from '../hooks/useActionState';
+import useQuests from '../hooks/useQuests';
+import ActionButton from '../components/ActionButton';
 
 // ─── Main view ─────────────────────────────────────────────────────────────
 
@@ -110,6 +28,8 @@ export default function BriefView({
   const [underlagLoading, setUnderlagLoading] = useState(false);
   const [underlagError, setUnderlagError] = useState(null);
   const { set, get } = useActionState();
+  const { quests: activeQuests } = useQuests({ status: 'in_progress' });
+  const inProgressQuest = activeQuests.length > 0 ? activeQuests[0] : null;
 
   if (loading) {
     return (
@@ -239,6 +159,18 @@ export default function BriefView({
     }
   }
 
+  async function handleCreateQuest() {
+    if (!quest_suggestion) return;
+    set('createQuest', 'loading', null);
+    try {
+      await promoteBriefQuest(quest_suggestion);
+      set('createQuest', 'done', null);
+      navigate('/quests');
+    } catch (err) {
+      set('createQuest', 'error', err.message);
+    }
+  }
+
   async function handleToggleUnderlag() {
     const next = !showUnderlag;
     setShowUnderlag(next);
@@ -314,6 +246,29 @@ export default function BriefView({
         </div>
       </div>
 
+      {/* Active quest banner */}
+      {inProgressQuest && (
+        <div
+          onClick={() => navigate(`/quest/${inProgressQuest.id}`)}
+          style={{
+            background: 'rgba(251,191,36,0.08)',
+            border: '1px solid rgba(251,191,36,0.2)',
+            borderRadius: 8,
+            padding: '10px 16px',
+            marginBottom: 20,
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 8,
+          }}
+        >
+          <span style={{ fontSize: 14 }}>⚡</span>
+          <span style={{ fontSize: 13, color: 'var(--text)' }}>Pågående quest: </span>
+          <span style={{ fontSize: 13, color: '#fbbf24', fontWeight: 600 }}>{inProgressQuest.title}</span>
+          <span style={{ fontSize: 12, color: 'var(--muted)', fontFamily: 'var(--font-mono, monospace)' }}>→</span>
+        </div>
+      )}
+
       {/* Situation + Quest */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 24 }}>
         <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 8, padding: 20 }}>
@@ -331,6 +286,13 @@ export default function BriefView({
               <span style={{ marginLeft: 12, fontWeight: 600 }}>Impact:</span> {quest_suggestion.estimated_impact}
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+              <ActionButton
+                label="Skapa quest →"
+                loadingLabel="Skapar…"
+                onClick={handleCreateQuest}
+                btnState={get('createQuest')}
+                variant="accent"
+              />
               <button onClick={() => setShowQuestPrompt(!showQuestPrompt)} style={{ padding: '4px 12px', borderRadius: 4, fontSize: 12, fontFamily: 'var(--font-mono, monospace)', cursor: 'pointer', background: 'transparent', border: '1px solid var(--accent)', color: 'var(--accent)' }}>
                 {showQuestPrompt ? 'Dölj prompt' : 'Förbered quest-prompt →'}
               </button>

@@ -1,85 +1,9 @@
 import { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import useActivity from '../hooks/useActivity';
+import useActionState from '../hooks/useActionState';
+import ActionButton from '../components/ActionButton';
 import { runDevwatch, runDevlog, runUpdate } from '../lib/api';
-
-function useActionState() {
-  const [states, setStates] = useState({});
-
-  const set = useCallback((key, state, errMsg) => {
-    setStates((prev) => ({ ...prev, [key]: { state, errMsg } }));
-  }, []);
-
-  const get = useCallback(
-    (key) => states[key] ?? { state: 'idle', errMsg: null },
-    [states],
-  );
-
-  return { set, get };
-}
-
-function ActionButton({ label, loadingLabel, onClick, btnState, variant = 'accent' }) {
-  const { state, errMsg } = btnState;
-
-  const baseStyle = {
-    padding: '4px 12px',
-    borderRadius: 4,
-    fontSize: 13,
-    fontFamily: 'var(--font-mono, monospace)',
-    cursor: state === 'loading' ? 'not-allowed' : 'pointer',
-    transition: 'opacity 0.15s',
-    opacity: state === 'loading' ? 0.6 : 1,
-    border: '1px solid',
-  };
-
-  const variantStyles = {
-    accent: {
-      background: 'transparent',
-      borderColor: 'var(--accent)',
-      color: 'var(--accent)',
-    },
-    muted: {
-      background: 'transparent',
-      borderColor: 'var(--muted)',
-      color: 'var(--muted)',
-    },
-    done: {
-      background: 'transparent',
-      borderColor: '#34d399',
-      color: '#34d399',
-    },
-    error: {
-      background: 'transparent',
-      borderColor: '#fb7185',
-      color: '#fb7185',
-    },
-  };
-
-  const displayVariant = state === 'done' ? 'done' : state === 'error' ? 'error' : variant;
-  const displayLabel =
-    state === 'loading'
-      ? loadingLabel
-      : state === 'done'
-      ? '✓ Klar'
-      : state === 'error'
-      ? 'Fel'
-      : label;
-
-  return (
-    <div style={{ display: 'inline-block' }}>
-      <button
-        onClick={onClick}
-        disabled={state === 'loading'}
-        style={{ ...baseStyle, ...variantStyles[displayVariant] }}
-      >
-        {displayLabel}
-      </button>
-      {state === 'error' && errMsg && (
-        <div style={{ color: '#fb7185', fontSize: 11, marginTop: 3 }}>{errMsg}</div>
-      )}
-    </div>
-  );
-}
 
 export default function ActivityView() {
   const navigate = useNavigate();
@@ -200,14 +124,14 @@ export default function ActivityView() {
             loadingLabel="Kör…"
             onClick={handleRunDevwatch}
             btnState={get('devwatch')}
-            variant="muted"
+            variant="secondary"
           />
           <ActionButton
             label="Devlog"
             loadingLabel="Kör…"
             onClick={handleRunDevlog}
             btnState={get('devlog')}
-            variant="muted"
+            variant="secondary"
           />
         </div>
       </div>

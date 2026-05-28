@@ -12,6 +12,8 @@ import PortfolioView from './views/PortfolioView';
 import MetricsView from './views/MetricsView';
 import PendingView from './views/PendingView';
 import ActivityView from './views/ActivityView';
+import QuestBoardView from './views/QuestBoardView';
+import QuestDetailView from './views/QuestDetailView';
 
 function AppShell() {
   const { projects, loading, error } = useProjects();
@@ -28,6 +30,7 @@ function AppShell() {
 
   const navItems = [
     { path: '/', label: 'Brief', icon: '◈' },
+    { path: '/quests', label: 'Quests', icon: '⚡' },
     { path: '/portfolio', label: 'Portfolio', icon: '⊞' },
     { path: '/metrics', label: 'Metrics', icon: '▦' },
     { path: '/activity', label: 'Activity', icon: '◎' },
@@ -78,6 +81,8 @@ function AppShell() {
             {/* #/pending kept for backwards-compat, redirects to #/portfolio */}
             <Route path="/pending" element={<PendingView />} />
             <Route path="/activity" element={<ActivityView />} />
+            <Route path="/quests" element={<QuestBoardView projects={projects} />} />
+            <Route path="/quest/:questId" element={<QuestDetailView projects={projects} />} />
             <Route path="/project/:slug" element={<ProjectDetail />} />
           </Routes>
         </main>

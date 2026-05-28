@@ -2,9 +2,13 @@ import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { marked } from 'marked';
 import useProject from '../hooks/useProject';
+import useActionState from '../hooks/useActionState';
+import ActionButton from '../components/ActionButton';
 import StatusBadge from './StatusBadge';
 import FamilyBadge from './FamilyBadge';
-import { getStageLabel, STATUS_LABELS, STAGE_LABELS } from '../data/labels';
+import LayerBadge from './LayerBadge';
+import QuestSection from './QuestSection';
+import { getStageLabel, STATUS_LABELS, STAGE_LABELS, getLayerLabel, getPipelineLabel } from '../data/labels';
 import {
   updateProject,
   analyzeProject,
@@ -23,91 +27,6 @@ function roiColor(value) {
 function formatSEK(n) {
   if (n == null) return '—';
   return n.toLocaleString('sv-SE') + ' kr';
-}
-
-// ─── Action button state machine ───────────────────────────────────────────
-
-function useActionState() {
-  const [states, setStates] = useState({});
-
-  const set = useCallback((key, state, errMsg) => {
-    setStates((prev) => ({ ...prev, [key]: { state, errMsg } }));
-  }, []);
-
-  const get = useCallback(
-    (key) => states[key] ?? { state: 'idle', errMsg: null },
-    [states],
-  );
-
-  return { set, get };
-}
-
-function ActionButton({ label, loadingLabel, onClick, btnState, variant = 'accent' }) {
-  const { state, errMsg } = btnState;
-
-  const baseStyle = {
-    padding: '4px 12px',
-    borderRadius: 4,
-    fontSize: 13,
-    fontFamily: 'var(--font-mono, monospace)',
-    cursor: state === 'loading' ? 'not-allowed' : 'pointer',
-    transition: 'opacity 0.15s',
-    opacity: state === 'loading' ? 0.6 : 1,
-    border: '1px solid',
-  };
-
-  const variantStyles = {
-    accent: {
-      background: 'transparent',
-      borderColor: 'var(--accent)',
-      color: 'var(--accent)',
-    },
-    success: {
-      background: 'transparent',
-      borderColor: '#34d399',
-      color: '#34d399',
-    },
-    danger: {
-      background: 'transparent',
-      borderColor: '#fb7185',
-      color: '#fb7185',
-    },
-    done: {
-      background: 'transparent',
-      borderColor: '#34d399',
-      color: '#34d399',
-    },
-    error: {
-      background: 'transparent',
-      borderColor: '#fb7185',
-      color: '#fb7185',
-    },
-  };
-
-  const displayVariant = state === 'done' ? 'done' : state === 'error' ? 'error' : variant;
-  const displayLabel =
-    state === 'loading'
-      ? loadingLabel
-      : state === 'done'
-      ? '✓ Klar'
-      : state === 'error'
-      ? 'Fel'
-      : label;
-
-  return (
-    <div>
-      <button
-        onClick={onClick}
-        disabled={state === 'loading'}
-        style={{ ...baseStyle, ...variantStyles[displayVariant] }}
-      >
-        {displayLabel}
-      </button>
-      {state === 'error' && errMsg && (
-        <div style={{ color: '#fb7185', fontSize: 11, marginTop: 3 }}>{errMsg}</div>
-      )}
-    </div>
-  );
 }
 
 // ─── File section (unchanged) ──────────────────────────────────────────────
@@ -417,6 +336,7 @@ export default function ProjectDetail() {
           {meta.title}
         </h1>
         <StatusBadge status={meta.status} />
+        <LayerBadge layer={meta.layer} />
         <FamilyBadge family={meta.family} />
         <span
           className="text-xs text-muted"
@@ -513,6 +433,9 @@ export default function ProjectDetail() {
         </div>
       </div>
 
+      {/* Quest section */}
+      <QuestSection slug={slug} projects={[]} />
+
       {/* Pending suggestions */}
       <ProjectPendingSection pending={pending} meta={meta} slug={slug} refresh={refresh} />
 
@@ -524,6 +447,8 @@ export default function ProjectDetail() {
         <MetaItem label="ROI" value={`${meta.roi_percent ?? 0}%`} valueStyle={{ color: roiColor(meta.roi_percent) }} />
         <MetaItem label="Cost" value={formatSEK(meta.cost_sek)} />
         <MetaItem label="Value" value={formatSEK(meta.value_sek)} />
+        {meta.layer && <MetaItem label="Layer" value={getLayerLabel(meta.layer)} />}
+        {meta.pipeline && <MetaItem label="Pipeline" value={getPipelineLabel(meta.pipeline)} />}
         <MetaItem label="Created" value={meta.created || '—'} />
         <MetaItem label="Updated" value={meta.updated || '—'} />
         {meta.url_live && <MetaItem label="Live" value={meta.url_live} link />}

@@ -62,3 +62,29 @@ export const FAMILY_COLORS = {
   'ideas': '#64748b',
 };
 export const getFamilyColor = (f) => FAMILY_COLORS[f] ?? '#64748b';
+
+// ── Layer labels ──────────────────────────────────────────
+export const LAYER_LABELS = {
+  pipeline: 'Pipeline',
+  infrastructure: 'Infrastructure',
+  interface: 'Interface',
+  concept: 'Concept',
+};
+export const getLayerLabel = (l) => LAYER_LABELS[l] ?? l;
+
+// ── Pipeline labels ───────────────────────────────────────
+export const PIPELINE_LABELS = {
+  'pipeline-intern': 'Intern Pipeline',
+  'pipeline-extern': 'Extern Pipeline',
+  'pipeline-review': 'Review Pipeline',
+};
+export const getPipelineLabel = (p) => PIPELINE_LABELS[p] ?? p;
+
+// ── Layer colors (hex for inline styles) ─────────────────
+export const LAYER_COLORS = {
+  pipeline: '#6366f1',
+  infrastructure: '#f59e0b',
+  interface: '#06b6d4',
+  concept: '#64748b',
+};
+export const getLayerColor = (l) => LAYER_COLORS[l] ?? '#64748b';

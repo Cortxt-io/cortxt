@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import ProjectCard from '../components/ProjectCard';
-import { getStatusColor, getFamilyColor } from '../data/labels';
+import { getStatusColor, getFamilyColor, getLayerColor } from '../data/labels';
 
 function roiColor(value) {
   if (value >= 250) return 'var(--success)';
@@ -16,6 +16,8 @@ function formatSEK(n) {
 export default function PortfolioView({ projects, loading, error }) {
   const [selectedStatuses, setSelectedStatuses] = useState(new Set());
   const [selectedFamilies, setSelectedFamilies] = useState(new Set());
+  const [selectedLayers, setSelectedLayers] = useState(new Set());
+  const [selectedPipelines, setSelectedPipelines] = useState(new Set());
   const [sortBy, setSortBy] = useState('updated');
 
   const uniqueStatuses = useMemo(
@@ -26,12 +28,22 @@ export default function PortfolioView({ projects, loading, error }) {
     () => [...new Set(projects.map((p) => p.family))].sort(),
     [projects]
   );
+  const uniqueLayers = useMemo(
+    () => [...new Set(projects.filter((p) => p.layer).map((p) => p.layer))].sort(),
+    [projects]
+  );
+  const uniquePipelines = useMemo(
+    () => [...new Set(projects.filter((p) => p.pipeline).map((p) => p.pipeline))].sort(),
+    [projects]
+  );
 
   const filtered = useMemo(() => {
     const result = projects.filter((p) => {
       const statusOk = selectedStatuses.size === 0 || selectedStatuses.has(p.status);
       const familyOk = selectedFamilies.size === 0 || selectedFamilies.has(p.family);
-      return statusOk && familyOk;
+      const layerOk = selectedLayers.size === 0 || selectedLayers.has(p.layer);
+      const pipelineOk = selectedPipelines.size === 0 || selectedPipelines.has(p.pipeline);
+      return statusOk && familyOk && layerOk && pipelineOk;
     });
 
     const sorters = {
@@ -42,7 +54,7 @@ export default function PortfolioView({ projects, loading, error }) {
     };
 
     return sorters[sortBy] ? result.sort(sorters[sortBy]) : result;
-  }, [projects, selectedStatuses, selectedFamilies, sortBy]);
+  }, [projects, selectedStatuses, selectedFamilies, selectedLayers, selectedPipelines, sortBy]);
 
   function toggleFilter(setter, current, value) {
     const next = new Set(current);
@@ -215,6 +227,92 @@ export default function PortfolioView({ projects, loading, error }) {
             {selectedFamilies.size > 0 && (
               <button
                 onClick={() => setSelectedFamilies(new Set())}
+                className="text-xs text-muted hover:text-text ml-1"
+                style={{ background: 'none', border: 'none', cursor: 'pointer' }}
+              >
+                Clear
+              </button>
+            )}
+          </div>
+        )}
+
+        {/* Layer chips */}
+        {uniqueLayers.length > 1 && (
+          <div className="flex flex-wrap items-center gap-2 mb-3">
+            <span
+              className="text-xs text-muted font-mono"
+              style={{ marginRight: '0.25rem' }}
+            >
+              Layer
+            </span>
+            {uniqueLayers.map((l) => {
+              const color = getLayerColor(l);
+              const active = selectedLayers.has(l);
+              return (
+                <button
+                  key={l}
+                  onClick={() => toggleFilter(setSelectedLayers, selectedLayers, l)}
+                  className="inline-flex items-center px-2 py-0.5 rounded text-xs font-mono border transition-all"
+                  style={{
+                    background: active ? `${color}15` : 'transparent',
+                    color: active ? color : 'var(--muted)',
+                    borderLeft: active ? `3px solid ${color}` : '1px solid var(--border)',
+                    borderRight: active ? '1px solid var(--border)' : undefined,
+                    borderTop: active ? '1px solid var(--border)' : undefined,
+                    borderBottom: active ? '1px solid var(--border)' : undefined,
+                    cursor: 'pointer',
+                  }}
+                >
+                  {l.replace(/-/g, ' ')}
+                </button>
+              );
+            })}
+            {selectedLayers.size > 0 && (
+              <button
+                onClick={() => setSelectedLayers(new Set())}
+                className="text-xs text-muted hover:text-text ml-1"
+                style={{ background: 'none', border: 'none', cursor: 'pointer' }}
+              >
+                Clear
+              </button>
+            )}
+          </div>
+        )}
+
+        {/* Pipeline chips */}
+        {uniquePipelines.length > 1 && (
+          <div className="flex flex-wrap items-center gap-2">
+            <span
+              className="text-xs text-muted font-mono"
+              style={{ marginRight: '0.25rem' }}
+            >
+              Pipeline
+            </span>
+            {uniquePipelines.map((p) => {
+              const color = getLayerColor('pipeline');
+              const active = selectedPipelines.has(p);
+              return (
+                <button
+                  key={p}
+                  onClick={() => toggleFilter(setSelectedPipelines, selectedPipelines, p)}
+                  className="inline-flex items-center px-2 py-0.5 rounded text-xs font-mono border transition-all"
+                  style={{
+                    background: active ? `${color}15` : 'transparent',
+                    color: active ? color : 'var(--muted)',
+                    borderLeft: active ? `3px solid ${color}` : '1px solid var(--border)',
+                    borderRight: active ? '1px solid var(--border)' : undefined,
+                    borderTop: active ? '1px solid var(--border)' : undefined,
+                    borderBottom: active ? '1px solid var(--border)' : undefined,
+                    cursor: 'pointer',
+                  }}
+                >
+                  {p.replace(/pipeline-/g, '').replace(/-/g, ' ')}
+                </button>
+              );
+            })}
+            {selectedPipelines.size > 0 && (
+              <button
+                onClick={() => setSelectedPipelines(new Set())}
                 className="text-xs text-muted hover:text-text ml-1"
                 style={{ background: 'none', border: 'none', cursor: 'pointer' }}
               >
