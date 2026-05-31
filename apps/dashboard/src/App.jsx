@@ -3,6 +3,7 @@ import { HashRouter, Routes, Route, Navigate, useNavigate, useLocation } from 'r
 import useProjects from './hooks/useProjects';
 import usePending from './hooks/usePending';
 import useBrief from './hooks/useBrief';
+import useIsMobile from './hooks/useIsMobile';
 import Nav from './components/Nav';
 import Sidebar from './components/Sidebar';
 import GraphView from './components/GraphView';
@@ -22,6 +23,7 @@ function AppShell() {
   const [showGraph, setShowGraph] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
+  const isMobile = useIsMobile();
 
   const handleGraphNavigate = useCallback((slug) => {
     navigate('/project/' + slug);
@@ -48,9 +50,9 @@ function AppShell() {
         />
       )}
 
-      <div className="app-layout">
+      <div style={{ display: 'flex', minHeight: 'calc(100vh - 60px)' }}>
         <Sidebar navItems={navItems} currentPath={location.pathname} />
-        <main className="main-content">
+        <main style={{ flex: 1, overflow: 'auto', minWidth: 0, paddingBottom: isMobile ? 70 : 0 }}>
           <Routes>
             <Route
               path="/"
