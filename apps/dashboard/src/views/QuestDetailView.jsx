@@ -13,6 +13,27 @@ export default function QuestDetailView({ projects }) {
   const { quest, loading, error, refresh } = useQuest(questId);
   const { set, get } = useActionState();
   const [resultSummary, setResultSummary] = useState('');
+  const [promptCopied, setPromptCopied] = useState(false);
+
+  function buildQuestPrompt() {
+    if (!quest) return '';
+    return (
+      `Projekt: ${quest.slug}\n` +
+      `Quest: ${quest.title}\n\n` +
+      `${quest.description ?? ''}\n\n` +
+      `Motivering: ${quest.estimated_impact ?? ''}\n\n` +
+      `[Läs projects/${quest.slug}/project.md och relevanta planning/-filer innan du börjar.]`
+    );
+  }
+
+  function copyQuestPrompt() {
+    navigator.clipboard.writeText(buildQuestPrompt())
+      .then(() => {
+        setPromptCopied(true);
+        setTimeout(() => setPromptCopied(false), 2000);
+      })
+      .catch(() => {});
+  }
 
   async function handleActivate() {
     set('activate', 'loading', null);
@@ -133,6 +154,19 @@ export default function QuestDetailView({ projects }) {
           <div style={{ fontSize: 14, color: 'var(--text)', lineHeight: 1.6 }}>{quest.result_summary}</div>
         </div>
       )}
+
+      {/* Qoder-prompt */}
+      <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 8, padding: 16, marginBottom: 20 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+          <span style={{ fontSize: 12, color: 'var(--muted)', fontWeight: 600, fontFamily: 'var(--font-mono, monospace)' }}>QODER-PROMPT</span>
+          <button onClick={copyQuestPrompt} style={{ padding: '4px 12px', borderRadius: 4, fontSize: 12, fontFamily: 'var(--font-mono, monospace)', cursor: 'pointer', background: 'transparent', border: `1px solid ${promptCopied ? '#34d399' : 'var(--muted)'}`, color: promptCopied ? '#34d399' : 'var(--muted)' }}>
+            {promptCopied ? '✓ Kopierad' : 'Kopiera'}
+          </button>
+        </div>
+        <pre style={{ fontSize: 13, color: 'var(--text)', background: 'var(--bg)', borderRadius: 4, padding: 12, overflowX: 'auto', whiteSpace: 'pre-wrap', fontFamily: 'var(--font-mono, monospace)', lineHeight: 1.5, margin: 0 }}>
+          {buildQuestPrompt()}
+        </pre>
+      </div>
 
       {/* Actions */}
       <div style={{ borderTop: '1px solid var(--border)', paddingTop: 20 }}>
