@@ -176,7 +176,7 @@ export default function QuestDetailView({ projects }) {
           </div>
         )}
 
-        {(quest.status === 'completed' || quest.status === 'archived') && (
+        {quest.status === 'completed' && (
           <ActionButton
             label="Arkivera →"
             loadingLabel="Arkiverar…"
