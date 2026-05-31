@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import useQuest from '../hooks/useQuest';
 import QuestStatusBadge from '../components/QuestStatusBadge';
+import CIBadge from '../components/CIBadge';
 import ActionButton from '../components/ActionButton';
 import useActionState from '../hooks/useActionState';
 import { activateQuest, completeQuest, archiveQuest } from '../lib/api';
@@ -87,6 +88,7 @@ export default function QuestDetailView({ projects }) {
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}>
         <h1 style={{ margin: 0, fontSize: 22, color: 'var(--text)' }}>{quest.title}</h1>
         <QuestStatusBadge status={quest.status} />
+        <CIBadge status={quest.ci_status} />
       </div>
 
       {/* Project link */}
