@@ -48,9 +48,9 @@ function AppShell() {
         />
       )}
 
-      <div style={{ display: 'flex', minHeight: 'calc(100vh - 60px)' }}>
+      <div className="app-layout">
         <Sidebar navItems={navItems} currentPath={location.pathname} />
-        <main style={{ flex: 1, overflow: 'auto' }}>
+        <main className="main-content">
           <Routes>
             <Route
               path="/"

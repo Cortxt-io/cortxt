@@ -98,14 +98,7 @@ export default function PortfolioView({ projects, loading, error }) {
   return (
     <div className="container" style={{ paddingTop: '1.5rem', paddingBottom: '4rem' }}>
       {/* Summary row */}
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(4, 1fr)',
-          gap: '1rem',
-          marginBottom: '2rem',
-        }}
-      >
+      <div className="grid-4-cols" style={{ marginBottom: '2rem' }}>
         <SummaryCard label="Projekt" value={projects.length} />
         <SummaryCard label="Kostnad" value={formatSEK(totalCost)} />
         <SummaryCard label="Värde" value={formatSEK(totalValue)} />

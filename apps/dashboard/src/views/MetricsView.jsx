@@ -56,18 +56,7 @@ export default function MetricsView({ projects }) {
             const color = roiColorHex(p.roi_percent);
             return (
               <div key={p.slug} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                <span
-                  style={{
-                    width: 200,
-                    flexShrink: 0,
-                    fontFamily: '"JetBrains Mono", monospace',
-                    fontSize: '0.8rem',
-                    color: 'var(--text)',
-                    whiteSpace: 'nowrap',
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                  }}
-                >
+                <span className="roi-label">
                   {p.title}
                 </span>
                 <div style={{ flex: 1, position: 'relative' }}>

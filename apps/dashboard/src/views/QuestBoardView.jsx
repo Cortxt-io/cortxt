@@ -43,7 +43,7 @@ export default function QuestBoardView({ projects }) {
 
   if (loading) {
     return (
-      <div style={{ padding: 32, maxWidth: 1200 }}>
+      <div className="view-padding">
         <h1 style={{ margin: '0 0 32px', fontSize: 22, color: 'var(--text)' }}>Quests</h1>
         <div style={{ color: 'var(--muted)', fontSize: 14 }}>Laddar quests…</div>
       </div>
@@ -52,7 +52,7 @@ export default function QuestBoardView({ projects }) {
 
   if (error) {
     return (
-      <div style={{ padding: 32, maxWidth: 1200 }}>
+      <div className="view-padding">
         <h1 style={{ margin: '0 0 16px', fontSize: 22, color: 'var(--text)' }}>Quests</h1>
         <div style={{ color: '#fb7185', fontSize: 13 }}>{error}</div>
       </div>
@@ -60,9 +60,9 @@ export default function QuestBoardView({ projects }) {
   }
 
   return (
-    <div style={{ padding: 32, maxWidth: 1200 }}>
+    <div className="view-padding">
       {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
+      <div className="view-header" style={{ marginBottom: 24 }}>
         <h1 style={{ margin: 0, fontSize: 22, color: 'var(--text)' }}>Quests</h1>
         <button
           onClick={refresh}
@@ -98,7 +98,7 @@ export default function QuestBoardView({ projects }) {
       )}
 
       {/* Kanban board */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16 }}>
+      <div className="kanban-board">
         {COLUMNS.map((col) => (
           <div key={col.key}>
             <div style={{

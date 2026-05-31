@@ -51,7 +51,7 @@ export default function QuestDetailView({ projects }) {
 
   if (loading) {
     return (
-      <div style={{ padding: 32, maxWidth: 800 }}>
+      <div className="view-padding">
         <p style={{ color: 'var(--muted)' }}>Laddar quest…</p>
       </div>
     );
@@ -59,7 +59,7 @@ export default function QuestDetailView({ projects }) {
 
   if (error || !quest) {
     return (
-      <div style={{ padding: 32, maxWidth: 800 }}>
+      <div className="view-padding">
         <p style={{ color: '#fb7185' }}>{error || 'Quest hittades inte'}</p>
         <button
           onClick={() => navigate('/quests')}
@@ -74,7 +74,7 @@ export default function QuestDetailView({ projects }) {
   const project = projects?.find((p) => p.slug === quest.slug);
 
   return (
-    <div style={{ padding: 32, maxWidth: 800 }}>
+    <div className="view-padding">
       {/* Back */}
       <button
         onClick={() => navigate('/quests')}
@@ -117,7 +117,7 @@ export default function QuestDetailView({ projects }) {
       )}
 
       {/* Meta */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 20 }}>
+      <div className="grid-2-cols" style={{ gap: 8, marginBottom: 20 }}>
         <MetaItem label="Skapad" value={quest.created_at ?? '—'} />
         <MetaItem label="Källa" value={quest.source ?? '—'} />
         <MetaItem label="Startad" value={quest.started_at ? quest.started_at.split('T')[0] : '—'} />

@@ -33,7 +33,7 @@ export default function BriefView({
 
   if (loading) {
     return (
-      <div style={{ padding: 32, maxWidth: 1100 }}>
+      <div className="view-padding">
         <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 32 }}>
           <h1 style={{ margin: 0, fontSize: 22, color: 'var(--text)' }}>Portfolio Brief</h1>
         </div>
@@ -52,7 +52,7 @@ export default function BriefView({
 
   if (error) {
     return (
-      <div style={{ padding: 32, maxWidth: 1100 }}>
+      <div className="view-padding">
         <h1 style={{ margin: '0 0 16px', fontSize: 22, color: 'var(--text)' }}>Portfolio Brief</h1>
         <div style={{ background: 'rgba(251,113,185,0.08)', border: '1px solid rgba(251,113,185,0.2)', borderRadius: 8, padding: 16, color: 'var(--text)' }}>
           <div style={{ fontWeight: 600, marginBottom: 8 }}>Kunde inte generera brief</div>
@@ -67,7 +67,7 @@ export default function BriefView({
 
   if (!brief) {
     return (
-      <div style={{ padding: 32, maxWidth: 1100 }}>
+      <div className="view-padding">
         <h1 style={{ margin: '0 0 16px', fontSize: 22, color: 'var(--text)' }}>Portfolio Brief</h1>
         <div style={{ textAlign: 'center', padding: '48px 24px', color: 'var(--muted)', fontSize: 14 }}>
           <p>Inga projekt i portföljen.</p>
@@ -223,11 +223,11 @@ export default function BriefView({
   }
 
   return (
-    <div style={{ padding: 32, maxWidth: 1100 }}>
+    <div className="view-padding">
       {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 32 }}>
+      <div className="view-header">
         <h1 style={{ margin: 0, fontSize: 22, color: 'var(--text)' }}>Dagens brief</h1>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+        <div className="view-header-actions">
           {generatedAt && (
             <span style={{ fontSize: 11, color: 'var(--muted)', fontFamily: 'var(--font-mono, monospace)' }}>
               {formatGeneratedAt()}
@@ -271,7 +271,7 @@ export default function BriefView({
       )}
 
       {/* Situation + Quest */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 24 }}>
+      <div className="grid-2-cols" style={{ marginBottom: 24 }}>
         <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 8, padding: 20 }}>
           <div style={{ fontSize: 12, color: 'var(--muted)', fontWeight: 600, marginBottom: 8, fontFamily: 'var(--font-mono, monospace)' }}>SITUATION</div>
           <div style={{ fontSize: 14, color: 'var(--text)', lineHeight: 1.6 }}>{situation}</div>

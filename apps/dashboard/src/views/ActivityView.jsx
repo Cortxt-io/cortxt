@@ -60,7 +60,7 @@ export default function ActivityView() {
 
   if (loading) {
     return (
-      <div style={{ padding: 32, maxWidth: 1100 }}>
+      <div className="view-padding">
         <h1 style={{ margin: '0 0 32px', fontSize: 22, color: 'var(--text)' }}>Activity</h1>
         <p style={{ color: 'var(--muted)' }}>Laddar aktivitet…</p>
       </div>
@@ -69,7 +69,7 @@ export default function ActivityView() {
 
   if (error) {
     return (
-      <div style={{ padding: 32, maxWidth: 1100 }}>
+      <div className="view-padding">
         <h1 style={{ margin: '0 0 16px', fontSize: 22, color: 'var(--text)' }}>Activity</h1>
         <div style={{ color: '#fb7185', fontSize: 13 }}>{error}</div>
       </div>
@@ -78,10 +78,10 @@ export default function ActivityView() {
 
   if (!hasActivity) {
     return (
-      <div style={{ padding: 32, maxWidth: 1100 }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 32 }}>
+      <div className="view-padding">
+        <div className="view-header">
           <h1 style={{ margin: 0, fontSize: 22, color: 'var(--text)' }}>Activity</h1>
-          <div style={{ display: 'flex', gap: 8 }}>
+          <div className="view-header-actions">
             <ActionButton
               label="Uppdatera allt"
               loadingLabel="Kör…"
@@ -108,10 +108,10 @@ export default function ActivityView() {
   }
 
   return (
-    <div style={{ padding: 32, maxWidth: 1100 }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 32 }}>
+    <div className="view-padding">
+      <div className="view-header">
         <h1 style={{ margin: 0, fontSize: 22, color: 'var(--text)' }}>Activity</h1>
-        <div style={{ display: 'flex', gap: 8 }}>
+        <div className="view-header-actions">
           <ActionButton
             label="Uppdatera allt"
             loadingLabel="Kör…"
