@@ -227,23 +227,11 @@ export default function BriefView({
       {/* Header */}
       <div className="view-header">
         <h1 style={{ margin: 0, fontSize: 22, color: 'var(--text)' }}>Dagens brief</h1>
-        <div className="view-header-actions">
-          {generatedAt && (
-            <span style={{ fontSize: 11, color: 'var(--muted)', fontFamily: 'var(--font-mono, monospace)' }}>
-              {formatGeneratedAt()}
-            </span>
-          )}
-          <ActionButton
-            label="Analysera alla →"
-            loadingLabel="Analyserar…"
-            onClick={handleAnalyzeAll}
-            btnState={get('analyzeAll')}
-            variant="accent"
-          />
-          <button onClick={refresh} style={{ padding: '6px 14px', borderRadius: 4, fontSize: 13, fontFamily: 'var(--font-mono, monospace)', cursor: 'pointer', background: 'transparent', border: '1px solid var(--accent)', color: 'var(--accent)' }}>
-            Generera ny ↻
-          </button>
-        </div>
+        {generatedAt && (
+          <span style={{ fontSize: 11, color: 'var(--muted)', fontFamily: 'var(--font-mono, monospace)' }}>
+            {formatGeneratedAt()}
+          </span>
+        )}
       </div>
 
       {/* Qoder arbetar på-banner */}
@@ -459,6 +447,20 @@ export default function BriefView({
           </div>
         </div>
       )}
+
+      {/* Subtle footer actions */}
+      <div style={{ marginTop: 32, paddingTop: 16, borderTop: '1px solid var(--border)', display: 'flex', gap: 12, alignItems: 'center' }}>
+        <button onClick={refresh} style={{ fontSize: 11, color: 'var(--muted)', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'var(--font-mono, monospace)', padding: 0 }}>
+          Generera ny brief ↻
+        </button>
+        <ActionButton
+          label="Analysera alla projekt →"
+          loadingLabel="Analyserar…"
+          onClick={handleAnalyzeAll}
+          btnState={get('analyzeAll')}
+          variant="secondary"
+        />
+      </div>
     </div>
   );
 }
