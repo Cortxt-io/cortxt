@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, Component } from 'react';
 import { HashRouter, Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import useProjects from './hooks/useProjects';
 import usePending from './hooks/usePending';
@@ -15,6 +15,33 @@ import PendingView from './views/PendingView';
 import ActivityView from './views/ActivityView';
 import QuestBoardView from './views/QuestBoardView';
 import QuestDetailView from './views/QuestDetailView';
+
+class ErrorBoundary extends Component {
+  constructor(props) {
+    super(props);
+    this.state = { error: null };
+  }
+  static getDerivedStateFromError(error) {
+    return { error };
+  }
+  render() {
+    if (this.state.error) {
+      return (
+        <div style={{ padding: 32, color: 'var(--text)', fontFamily: 'monospace', fontSize: 13 }}>
+          <div style={{ color: '#f87171', fontWeight: 700, marginBottom: 8 }}>App kraschade</div>
+          <pre style={{ whiteSpace: 'pre-wrap', color: 'var(--muted)' }}>{String(this.state.error)}</pre>
+          <button
+            onClick={() => window.location.reload()}
+            style={{ marginTop: 16, padding: '6px 16px', borderRadius: 4, cursor: 'pointer', background: 'var(--accent)', color: '#fff', border: 'none' }}
+          >
+            Ladda om
+          </button>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
 
 function AppShell() {
   const { projects, loading, error } = useProjects();
@@ -96,7 +123,9 @@ function AppShell() {
 export default function App() {
   return (
     <HashRouter>
-      <AppShell />
+      <ErrorBoundary>
+        <AppShell />
+      </ErrorBoundary>
     </HashRouter>
   );
 }
