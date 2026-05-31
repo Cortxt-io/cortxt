@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { pushQuestToPlanning, fetchActivity, analyzeAll, approveProject, rejectProject, runUpdate, promoteBriefQuest } from '../lib/api';
+import { fetchActivity, analyzeAll, approveProject, rejectProject, runUpdate, promoteBriefQuest } from '../lib/api';
 import useActionState from '../hooks/useActionState';
 import useQuests from '../hooks/useQuests';
 import ActionButton from '../components/ActionButton';
@@ -20,9 +20,6 @@ export default function BriefView({
   refreshAnalyze,
 }) {
   const navigate = useNavigate();
-  const [showQuestPrompt, setShowQuestPrompt] = useState(false);
-  const [pushState, setPushState] = useState('idle');
-  const [pushError, setPushError] = useState(null);
   const [showUnderlag, setShowUnderlag] = useState(false);
   const [underlag, setUnderlag] = useState(null);
   const [underlagLoading, setUnderlagLoading] = useState(false);
@@ -114,48 +111,12 @@ export default function BriefView({
     }
   }
 
-  function buildQuestPrompt() {
-    if (!quest_suggestion) return '';
-    return (
-      `Projekt: ${quest_suggestion.target_slug}\n` +
-      `Quest: ${quest_suggestion.title}\n\n` +
-      `${quest_suggestion.description}\n\n` +
-      `Motivering: ${quest_suggestion.estimated_impact}\n\n` +
-      `[Läs projects/${quest_suggestion.target_slug}/project.md och relevanta planning/-filer innan du börjar.]`
-    );
-  }
-
-  function copyQuestPrompt() {
-    navigator.clipboard.writeText(buildQuestPrompt()).catch(() => {});
-  }
-
   function formatGeneratedAt() {
     if (!generatedAt) return '';
     try {
       return new Date(generatedAt).toLocaleString('sv-SE', { dateStyle: 'short', timeStyle: 'short' });
     } catch {
       return generatedAt;
-    }
-  }
-
-  async function handlePushToPlanning() {
-    if (!quest_suggestion || !quest_suggestion.target_slug) return;
-    setPushState('loading');
-    setPushError(null);
-    const today = new Date().toISOString().split('T')[0];
-    try {
-      await pushQuestToPlanning(quest_suggestion.target_slug, {
-        title: quest_suggestion.title,
-        description: quest_suggestion.description,
-        estimated_impact: quest_suggestion.estimated_impact,
-        source: 'portfolio-brief',
-        created_at: today,
-      });
-      setPushState('done');
-      setTimeout(() => setPushState('idle'), 2000);
-    } catch (err) {
-      setPushState('error');
-      setPushError(err.message);
     }
   }
 
@@ -282,34 +243,10 @@ export default function BriefView({
                 btnState={get('createQuest')}
                 variant="accent"
               />
-              <button onClick={() => setShowQuestPrompt(!showQuestPrompt)} style={{ padding: '4px 12px', borderRadius: 4, fontSize: 12, fontFamily: 'var(--font-mono, monospace)', cursor: 'pointer', background: 'transparent', border: '1px solid var(--accent)', color: 'var(--accent)' }}>
-                {showQuestPrompt ? 'Dölj prompt' : 'Förbered quest-prompt →'}
-              </button>
-              <button
-                onClick={handlePushToPlanning}
-                disabled={pushState === 'loading'}
-                style={{ padding: '4px 12px', borderRadius: 4, fontSize: 12, fontFamily: 'var(--font-mono, monospace)', cursor: pushState === 'loading' ? 'not-allowed' : 'pointer', background: 'transparent', border: `1px solid ${pushState === 'done' ? '#34d399' : pushState === 'error' ? '#fb7185' : 'var(--accent)'}`, color: pushState === 'done' ? '#34d399' : pushState === 'error' ? '#fb7185' : 'var(--accent)', opacity: pushState === 'loading' ? 0.6 : 1 }}
-              >
-                {pushState === 'loading' ? 'Sparar…' : pushState === 'done' ? '✓ Sparad' : pushState === 'error' ? 'Fel' : 'Spara till planning →'}
-              </button>
-              {pushError && <div style={{ fontSize: 11, color: '#fb7185', width: '100%' }}>{pushError}</div>}
             </div>
           </div>
         )}
       </div>
-
-      {/* Quest prompt */}
-      {showQuestPrompt && quest_suggestion && (
-        <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 8, padding: 16, marginBottom: 24 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-            <span style={{ fontSize: 12, color: 'var(--muted)', fontWeight: 600, fontFamily: 'var(--font-mono, monospace)' }}>QODER-PROMPT</span>
-            <button onClick={copyQuestPrompt} style={{ padding: '4px 12px', borderRadius: 4, fontSize: 12, fontFamily: 'var(--font-mono, monospace)', cursor: 'pointer', background: 'transparent', border: '1px solid var(--muted)', color: 'var(--muted)' }}>Kopiera</button>
-          </div>
-          <pre style={{ fontSize: 13, color: 'var(--text)', background: 'var(--bg)', borderRadius: 4, padding: 12, overflowX: 'auto', whiteSpace: 'pre-wrap', fontFamily: 'var(--font-mono, monospace)', lineHeight: 1.5 }}>
-            {buildQuestPrompt()}
-          </pre>
-        </div>
-      )}
 
       {/* Underlag toggle */}
       <div style={{ marginBottom: 24, display: 'flex', alignItems: 'center', gap: 8 }}>

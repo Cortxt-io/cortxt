@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import useQuests from '../hooks/useQuests';
 import QuestStatusBadge from './QuestStatusBadge';
+import CIBadge from './CIBadge';
 import ActionButton from './ActionButton';
 import useActionState from '../hooks/useActionState';
 import { createQuest } from '../lib/api';
@@ -105,6 +106,7 @@ export default function QuestSection({ slug, projects }) {
             >
               <QuestStatusBadge status={q.status} />
               <span style={{ fontSize: 13, color: 'var(--text)', fontWeight: 600 }}>{q.title}</span>
+              <CIBadge status={q.ci_status} />
             </div>
           ))}
         </div>
