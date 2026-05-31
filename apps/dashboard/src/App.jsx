@@ -68,7 +68,6 @@ function AppShell() {
                   projects={projects}
                   refreshPending={refreshPending}
                   refreshAnalyze={refreshPending}
-                  quests={quests}
                 />
               }
             />
@@ -100,6 +99,4 @@ export default function App() {
       <AppShell />
     </HashRouter>
   );
-}
-}
 }
