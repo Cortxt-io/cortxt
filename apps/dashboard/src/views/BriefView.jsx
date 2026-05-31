@@ -247,7 +247,7 @@ export default function BriefView({
       </div>
 
       {/* Qoder arbetar på-banner */}
-      {inProgressQuests.length > 0 && (
+      {inProgressQuest && (
         <div style={{
           background: 'rgba(251,191,36,0.08)',
           border: '1px solid rgba(251,191,36,0.2)',
@@ -262,7 +262,7 @@ export default function BriefView({
           gap: 8,
         }}>
           <span>⚡</span>
-          <span>Pågående: {inProgressQuests.map(q => q.title).join(', ')}</span>
+          <span>Pågående: {inProgressQuest.title}</span>
           <button onClick={() => navigate('/quests')} style={{
             marginLeft: 'auto', background: 'none', border: 'none',
             color: '#fbbf24', cursor: 'pointer', fontSize: 12,
