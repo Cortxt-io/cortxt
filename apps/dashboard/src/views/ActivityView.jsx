@@ -17,8 +17,12 @@ export default function ActivityView() {
       if (result.status === 'error') {
         set('updateAll', 'error', result.message);
       } else {
-        set('updateAll', 'done', null);
+        set('updateAll', 'done', result);
         refresh();
+        // Show skipped info if devwatch was skipped
+        if (result?.results?.devwatch?.status === 'skipped') {
+          // Status is available in the done state data
+        }
         setTimeout(() => set('updateAll', 'idle', null), 2000);
       }
     } catch (err) {
@@ -33,7 +37,7 @@ export default function ActivityView() {
       if (result.status === 'error') {
         set('devwatch', 'error', result.message);
       } else {
-        set('devwatch', 'done', null);
+        set('devwatch', 'done', result);
         refresh();
         setTimeout(() => set('devwatch', 'idle', null), 2000);
       }
@@ -49,7 +53,7 @@ export default function ActivityView() {
       if (result.status === 'error') {
         set('devlog', 'error', result.message);
       } else {
-        set('devlog', 'done', null);
+        set('devlog', 'done', result);
         refresh();
         setTimeout(() => set('devlog', 'idle', null), 2000);
       }
@@ -89,6 +93,11 @@ export default function ActivityView() {
               btnState={get('updateAll')}
               variant="accent"
             />
+            {get('updateAll')?.state === 'done' && get('updateAll')?.data?.results?.devwatch?.status === 'skipped' && (
+              <span style={{ fontSize: 11, color: 'var(--muted)', fontFamily: 'var(--font-mono, monospace)' }}>
+                Devwatch körs via GitHub Actions. Devlog/export kördes.
+              </span>
+            )}
           </div>
         </div>
         <p style={{ color: 'var(--muted)', fontSize: 14, lineHeight: 1.6, maxWidth: 500 }}>
@@ -126,6 +135,11 @@ export default function ActivityView() {
             btnState={get('devwatch')}
             variant="secondary"
           />
+          {get('devwatch')?.state === 'done' && get('devwatch')?.data?.status === 'skipped' && (
+            <span style={{ fontSize: 11, color: 'var(--muted)', fontFamily: 'var(--font-mono, monospace)' }}>
+              Devwatch körs via GitHub Actions.
+            </span>
+          )}
           <ActionButton
             label="Devlog"
             loadingLabel="Kör…"

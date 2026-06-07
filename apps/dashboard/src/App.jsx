@@ -8,11 +8,12 @@ import Nav from './components/Nav';
 import Sidebar from './components/Sidebar';
 import GraphView from './components/GraphView';
 import ProjectDetail from './components/ProjectDetail';
+import HomeView from './views/HomeView';
 import BriefView from './views/BriefView';
 import PortfolioView from './views/PortfolioView';
 import MetricsView from './views/MetricsView';
 import PendingView from './views/PendingView';
-import ActivityView from './views/ActivityView';
+import Timeline from './components/Timeline';
 import QuestBoardView from './views/QuestBoardView';
 import QuestDetailView from './views/QuestDetailView';
 
@@ -58,11 +59,12 @@ function AppShell() {
   }, [navigate]);
 
   const navItems = [
-    { path: '/', label: 'Brief', icon: '◈' },
+    { path: '/', label: 'Hem', icon: '⌂' },
+    { path: '/brief', label: 'Brief', icon: '◈' },
     { path: '/quests', label: 'Quests', icon: '⚡' },
     { path: '/portfolio', label: 'Portfolio', icon: '⊞' },
+    { path: '/timeline', label: 'Tidslinje', icon: '◎' },
     { path: '/metrics', label: 'Metrics', icon: '▦' },
-    { path: '/activity', label: 'Activity', icon: '◎' },
   ];
 
   return (
@@ -83,6 +85,19 @@ function AppShell() {
           <Routes>
             <Route
               path="/"
+              element={
+                <HomeView
+                  brief={brief}
+                  loading={briefLoading}
+                  error={briefError}
+                  refresh={refreshBrief}
+                  generatedAt={briefGeneratedAt}
+                  projects={projects}
+                />
+              }
+            />
+            <Route
+              path="/brief"
               element={
                 <BriefView
                   brief={brief}
@@ -109,10 +124,11 @@ function AppShell() {
             <Route path="/analyze" element={<Navigate to="/portfolio" replace />} />
             {/* #/pending kept for backwards-compat, redirects to #/portfolio */}
             <Route path="/pending" element={<PendingView />} />
-            <Route path="/activity" element={<ActivityView />} />
+            <Route path="/activity" element={<Navigate to="/timeline" replace />} />
+            <Route path="/timeline" element={<Timeline projects={projects} />} />
             <Route path="/quests" element={<QuestBoardView projects={projects} />} />
             <Route path="/quest/:questId" element={<QuestDetailView projects={projects} />} />
-            <Route path="/project/:slug" element={<ProjectDetail />} />
+            <Route path="/project/:slug" element={<ProjectDetail projects={projects} />} />
           </Routes>
         </main>
       </div>

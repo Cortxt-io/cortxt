@@ -185,3 +185,21 @@ export async function promoteBriefQuest(suggestion) {
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
   return res.json();
 }
+
+// ── Eventstream + Devlog API ────────────────────────────────────────────────
+
+export async function fetchEventstream(filters = {}) {
+  const params = new URLSearchParams();
+  if (filters.slug) params.set('slug', filters.slug);
+  if (filters.source) params.set('source', filters.source);
+  const qs = params.toString() ? `?${params.toString()}` : '';
+  const res = await fetch(`${BASE}/api/eventstream/events${qs}`, { headers: authHeaders() });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return res.json();
+}
+
+export async function fetchDevlog() {
+  const res = await fetch(`${BASE}/api/devlog`, { headers: authHeaders() });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return res.json();
+}

@@ -161,7 +161,7 @@ export default function BriefView({
       if (result.status === 'error') {
         set('runUpdate', 'error', result.message);
       } else {
-        set('runUpdate', 'done', null);
+        set('runUpdate', 'done', result);
         // Refresh underlag if visible
         if (showUnderlag) {
           setUnderlagLoading(true);
@@ -260,6 +260,11 @@ export default function BriefView({
           btnState={get('runUpdate')}
           variant="muted"
         />
+        {get('runUpdate')?.state === 'done' && get('runUpdate')?.data?.results?.devwatch?.status === 'skipped' && (
+          <span style={{ fontSize: 12, color: 'var(--muted)', fontFamily: 'var(--font-mono, monospace)' }}>
+            Devwatch körs via GitHub Actions (inte tillgängligt på servern). Devlog och export kördes ändå.
+          </span>
+        )}
       </div>
 
       {/* Underlag */}

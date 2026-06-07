@@ -131,3 +131,14 @@ export const NODE_STAGE_COLORS = {
   maturing: '#6ee7b7',
 };
 export const getNodeStageColor = (s) => NODE_STAGE_COLORS[s] ?? '#64748b';
+
+// ── Eventstream: event-type colors (hex) ────────────────────
+export const EVENT_COLORS = {
+  stage_change:  '#10b981',  // green — most important
+  deploy:        '#06b6d4',  // cyan
+  pull_request:  '#a855f7',  // purple
+  push:          '#6366f1',  // blue (accent)
+  md_change:     '#64748b',  // gray
+  workflow_run:  '#475569',  // dimmed slate
+};
+export const getEventColor = (what) => EVENT_COLORS[what] ?? '#64748b';

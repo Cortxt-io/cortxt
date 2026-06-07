@@ -6,7 +6,7 @@ export default function Sidebar({ navItems, currentPath }) {
   const isMobile = useIsMobile();
 
   function isActive(item) {
-    if (item.path === '/' || item.path === '/portfolio') return currentPath === item.path;
+    if (item.path === '/' || item.path === '/brief' || item.path === '/portfolio' || item.path === '/timeline') return currentPath === item.path;
     return currentPath.startsWith(item.path);
   }
 

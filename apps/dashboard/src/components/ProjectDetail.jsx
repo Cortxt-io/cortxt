@@ -11,6 +11,7 @@ import KindBadge from './KindBadge';
 import NodeRelationsList from './NodeRelationsList';
 import RiskMatrix from './RiskMatrix';
 import QuestSection from './QuestSection';
+import Timeline from './Timeline';
 import { getStageLabel, getNodeStageLabel, getNodeStageColor, STATUS_LABELS, STAGE_LABELS, getLayerLabel, getPipelineLabel } from '../data/labels';
 import {
   updateProject,
@@ -242,7 +243,7 @@ function ProjectPendingSection({ pending, meta, slug, refresh }) {
 
 // ─── Main component ────────────────────────────────────────────────────────
 
-export default function ProjectDetail() {
+export default function ProjectDetail({ projects = [] }) {
   const { slug } = useParams();
   const navigate = useNavigate();
   const { project, loading, error, refresh } = useProject(slug);
@@ -444,6 +445,12 @@ export default function ProjectDetail() {
 
       {/* Quest section */}
       <QuestSection slug={slug} projects={[]} />
+
+      {/* Aktivitet — eventstream filtrerad på nod */}
+      <div style={{ marginBottom: '2rem' }}>
+        <div style={{ fontSize: 12, color: 'var(--muted)', fontWeight: 600, fontFamily: 'var(--font-mono, monospace)', marginBottom: 8 }}>AKTIVITET</div>
+        <Timeline slug={slug} projects={projects} />
+      </div>
 
       {/* Node relations (kind-aware) */}
       <NodeRelationsList partOf={meta.part_of} feeds={meta.feeds} dependsOn={meta.depends_on} />
