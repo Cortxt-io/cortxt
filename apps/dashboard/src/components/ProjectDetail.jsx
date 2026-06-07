@@ -9,6 +9,7 @@ import FamilyBadge from './FamilyBadge';
 import LayerBadge from './LayerBadge';
 import KindBadge from './KindBadge';
 import NodeRelationsList from './NodeRelationsList';
+import RiskMatrix from './RiskMatrix';
 import QuestSection from './QuestSection';
 import { getStageLabel, getNodeStageLabel, getNodeStageColor, STATUS_LABELS, STAGE_LABELS, getLayerLabel, getPipelineLabel } from '../data/labels';
 import {
@@ -496,6 +497,13 @@ export default function ProjectDetail() {
         ) : null
       ))}
 
+
+      {/* Risk Matrix — probability × impact visualization */}
+      {meta.risks && meta.risks.length > 0 && (
+        <div style={{ borderTop: '1px solid var(--border)', paddingTop: '2rem', marginTop: '2rem' }}>
+          <RiskMatrix risks={meta.risks} />
+        </div>
+      )}
       {/* Project files */}
       {project_files && Object.keys(project_files).some(k => project_files[k]?.length > 0) && (
         <div style={{ borderTop: '1px solid var(--border)', paddingTop: '2rem', marginTop: '2rem' }}>
