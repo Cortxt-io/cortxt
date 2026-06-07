@@ -1,8 +1,9 @@
-import { useNavigate } from 'react-router-dom';
+﻿import { useNavigate } from 'react-router-dom';
 import StatusBadge from './StatusBadge';
 import FamilyBadge from './FamilyBadge';
 import LayerBadge from './LayerBadge';
-import { getStageLabel } from '../data/labels';
+import KindBadge from './KindBadge';
+import { getStageLabel, getNodeStageLabel, getNodeStageColor } from '../data/labels';
 
 function roiColor(value) {
   if (value >= 250) return 'var(--success)';
@@ -12,6 +13,16 @@ function roiColor(value) {
 
 export default function ProjectCard({ project }) {
   const navigate = useNavigate();
+  const hasKind = !!project.kind;
+  const hasCost = project.cost_sek > 0 || project.value_sek > 0;
+
+  // Fallback: stage → status, kind → family
+  const displayStage = hasKind
+    ? getNodeStageLabel(project.stage)
+    : getStageLabel(project.mvp_stage);
+  const stageColor = hasKind
+    ? getNodeStageColor(project.stage)
+    : undefined;
 
   return (
     <div
@@ -23,23 +34,38 @@ export default function ProjectCard({ project }) {
 
       {/* Badges */}
       <div className="flex flex-wrap items-center gap-2 mb-2">
-        <StatusBadge status={project.status} />
-        <LayerBadge layer={project.layer} />
-        <FamilyBadge family={project.family} />
+        {hasKind ? (
+          <KindBadge kind={project.kind} />
+        ) : (
+          <>
+            <StatusBadge status={project.status} />
+            <LayerBadge layer={project.layer} />
+            <FamilyBadge family={project.family} />
+          </>
+        )}
       </div>
 
       {/* Stage */}
       <p
         className="text-xs mb-2"
-        style={{ fontFamily: '"JetBrains Mono", monospace', color: 'var(--muted)' }}
+        style={{ fontFamily: '"JetBrains Mono", monospace', color: stageColor || 'var(--muted)' }}
       >
-        {getStageLabel(project.mvp_stage)}
+        {displayStage}
       </p>
 
-      {/* ROI */}
-      <p className="text-sm font-semibold mb-2" style={{ color: roiColor(project.roi_percent) }}>
-        ROI {project.roi_percent ?? 0}%
-      </p>
+      {/* Part-of breadcrumb */}
+      {project.part_of && (
+        <p className="text-xs mb-2" style={{ fontFamily: '"JetBrains Mono", monospace', color: 'var(--muted)' }}>
+          in {project.part_of}
+        </p>
+      )}
+
+      {/* ROI — only show for nodes that actually have cost/value */}
+      {hasCost && (
+        <p className="text-sm font-semibold mb-2" style={{ color: roiColor(project.roi_percent) }}>
+          ROI {project.roi_percent ?? 0}%
+        </p>
+      )}
 
       {/* Summary */}
       {project.summary && (

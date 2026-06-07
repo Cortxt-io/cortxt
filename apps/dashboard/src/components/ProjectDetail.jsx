@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+﻿import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { marked } from 'marked';
 import useProject from '../hooks/useProject';
@@ -7,8 +7,10 @@ import ActionButton from '../components/ActionButton';
 import StatusBadge from './StatusBadge';
 import FamilyBadge from './FamilyBadge';
 import LayerBadge from './LayerBadge';
+import KindBadge from './KindBadge';
+import NodeRelationsList from './NodeRelationsList';
 import QuestSection from './QuestSection';
-import { getStageLabel, STATUS_LABELS, STAGE_LABELS, getLayerLabel, getPipelineLabel } from '../data/labels';
+import { getStageLabel, getNodeStageLabel, getNodeStageColor, STATUS_LABELS, STAGE_LABELS, getLayerLabel, getPipelineLabel } from '../data/labels';
 import {
   updateProject,
   analyzeProject,
@@ -330,19 +332,25 @@ export default function ProjectDetail() {
         ← Portfolio
       </button>
 
-      {/* Header */}
+      {/* Header — kind-aware with fallback */}
       <div className="flex flex-wrap items-center gap-3 mb-6">
         <h1 className="text-3xl font-extrabold text-text" style={{ letterSpacing: '-0.03em' }}>
           {meta.title}
         </h1>
-        <StatusBadge status={meta.status} />
-        <LayerBadge layer={meta.layer} />
-        <FamilyBadge family={meta.family} />
+        {meta.kind ? (
+          <KindBadge kind={meta.kind} />
+        ) : (
+          <>
+            <StatusBadge status={meta.status} />
+            <LayerBadge layer={meta.layer} />
+            <FamilyBadge family={meta.family} />
+          </>
+        )}
         <span
           className="text-xs text-muted"
-          style={{ fontFamily: '"JetBrains Mono", monospace' }}
+          style={{ fontFamily: '"JetBrains Mono", monospace', color: meta.kind ? getNodeStageColor(meta.stage) : undefined }}
         >
-          {getStageLabel(meta.mvp_stage)}
+          {meta.kind ? getNodeStageLabel(meta.stage) : getStageLabel(meta.mvp_stage)}
         </span>
       </div>
 
@@ -436,6 +444,9 @@ export default function ProjectDetail() {
       {/* Quest section */}
       <QuestSection slug={slug} projects={[]} />
 
+      {/* Node relations (kind-aware) */}
+      <NodeRelationsList partOf={meta.part_of} feeds={meta.feeds} dependsOn={meta.depends_on} />
+
       {/* Pending suggestions */}
       <ProjectPendingSection pending={pending} meta={meta} slug={slug} refresh={refresh} />
 
@@ -447,6 +458,9 @@ export default function ProjectDetail() {
         <MetaItem label="ROI" value={`${meta.roi_percent ?? 0}%`} valueStyle={{ color: roiColor(meta.roi_percent) }} />
         <MetaItem label="Cost" value={formatSEK(meta.cost_sek)} />
         <MetaItem label="Value" value={formatSEK(meta.value_sek)} />
+        {meta.kind && <MetaItem label="Kind" value={meta.kind} valueStyle={{ fontFamily: 'var(--font-mono, monospace)', color: getNodeStageColor(meta.stage) }} />}
+        {meta.stage && <MetaItem label="Stage" value={meta.stage} valueStyle={{ fontFamily: 'var(--font-mono, monospace)', color: getNodeStageColor(meta.stage) }} />}
+        {meta.part_of && <MetaItem label="Part of" value={meta.part_of} />}
         {meta.layer && <MetaItem label="Layer" value={getLayerLabel(meta.layer)} />}
         {meta.pipeline && <MetaItem label="Pipeline" value={getPipelineLabel(meta.pipeline)} />}
         <MetaItem label="Created" value={meta.created || '—'} />

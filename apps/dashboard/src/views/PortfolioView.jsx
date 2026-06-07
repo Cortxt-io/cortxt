@@ -1,6 +1,6 @@
-import { useState, useMemo } from 'react';
+﻿import { useState, useMemo } from 'react';
 import ProjectCard from '../components/ProjectCard';
-import { getStatusColor, getFamilyColor, getLayerColor } from '../data/labels';
+import { getStatusColor, getFamilyColor, getLayerColor, getKindHexColor } from '../data/labels';
 
 function roiColor(value) {
   if (value >= 250) return 'var(--success)';
@@ -18,6 +18,7 @@ export default function PortfolioView({ projects, loading, error }) {
   const [selectedFamilies, setSelectedFamilies] = useState(new Set());
   const [selectedLayers, setSelectedLayers] = useState(new Set());
   const [selectedPipelines, setSelectedPipelines] = useState(new Set());
+  const [selectedKinds, setSelectedKinds] = useState(new Set());
   const [sortBy, setSortBy] = useState('updated');
 
   const uniqueStatuses = useMemo(
@@ -36,6 +37,10 @@ export default function PortfolioView({ projects, loading, error }) {
     () => [...new Set(projects.filter((p) => p.pipeline).map((p) => p.pipeline))].sort(),
     [projects]
   );
+  const uniqueKinds = useMemo(
+    () => [...new Set(projects.filter((p) => p.kind).map((p) => p.kind))].sort(),
+    [projects]
+  );
 
   const filtered = useMemo(() => {
     const result = projects.filter((p) => {
@@ -43,7 +48,8 @@ export default function PortfolioView({ projects, loading, error }) {
       const familyOk = selectedFamilies.size === 0 || selectedFamilies.has(p.family);
       const layerOk = selectedLayers.size === 0 || selectedLayers.has(p.layer);
       const pipelineOk = selectedPipelines.size === 0 || selectedPipelines.has(p.pipeline);
-      return statusOk && familyOk && layerOk && pipelineOk;
+      const kindOk = selectedKinds.size === 0 || selectedKinds.has(p.kind);
+      return statusOk && familyOk && layerOk && pipelineOk && kindOk;
     });
 
     const sorters = {
@@ -51,10 +57,11 @@ export default function PortfolioView({ projects, loading, error }) {
       roi: (a, b) => (b.roi_percent ?? 0) - (a.roi_percent ?? 0),
       title: (a, b) => a.title.localeCompare(b.title, 'sv'),
       status: (a, b) => (a.status || '').localeCompare(b.status || ''),
+      kind: (a, b) => (a.kind || '').localeCompare(b.kind || ''),
     };
 
     return sorters[sortBy] ? result.sort(sorters[sortBy]) : result;
-  }, [projects, selectedStatuses, selectedFamilies, selectedLayers, selectedPipelines, sortBy]);
+  }, [projects, selectedStatuses, selectedFamilies, selectedLayers, selectedPipelines, selectedKinds, sortBy]);
 
   function toggleFilter(setter, current, value) {
     const next = new Set(current);
@@ -146,6 +153,7 @@ export default function PortfolioView({ projects, loading, error }) {
             <option value="roi">ROI (högst först)</option>
             <option value="title">Titel (A–Ö)</option>
             <option value="status">Status</option>
+            <option value="kind">Kind</option>
           </select>
         </div>
 
@@ -306,6 +314,49 @@ export default function PortfolioView({ projects, loading, error }) {
             {selectedPipelines.size > 0 && (
               <button
                 onClick={() => setSelectedPipelines(new Set())}
+                className="text-xs text-muted hover:text-text ml-1"
+                style={{ background: 'none', border: 'none', cursor: 'pointer' }}
+              >
+                Clear
+              </button>
+            )}
+          </div>
+        )}
+
+        {/* Kind chips */}
+        {uniqueKinds.length > 1 && (
+          <div className="flex flex-wrap items-center gap-2 mb-3">
+            <span
+              className="text-xs text-muted font-mono"
+              style={{ marginRight: '0.25rem' }}
+            >
+              Kind
+            </span>
+            {uniqueKinds.map((k) => {
+              const color = getKindHexColor(k);
+              const active = selectedKinds.has(k);
+              return (
+                <button
+                  key={k}
+                  onClick={() => toggleFilter(setSelectedKinds, selectedKinds, k)}
+                  className="inline-flex items-center px-2 py-0.5 rounded text-xs font-mono border transition-all"
+                  style={{
+                    background: active ? `${color}15` : 'transparent',
+                    color: active ? color : 'var(--muted)',
+                    borderLeft: active ? `3px solid ${color}` : '1px solid var(--border)',
+                    borderRight: active ? '1px solid var(--border)' : undefined,
+                    borderTop: active ? '1px solid var(--border)' : undefined,
+                    borderBottom: active ? '1px solid var(--border)' : undefined,
+                    cursor: 'pointer',
+                  }}
+                >
+                  {k}
+                </button>
+              );
+            })}
+            {selectedKinds.size > 0 && (
+              <button
+                onClick={() => setSelectedKinds(new Set())}
                 className="text-xs text-muted hover:text-text ml-1"
                 style={{ background: 'none', border: 'none', cursor: 'pointer' }}
               >
