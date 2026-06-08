@@ -1,5 +1,6 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
-import { updateProject, analyzeProject } from '../lib/api';
+import { useNavigate } from 'react-router-dom';
+import { analyzeProject } from '../lib/api';
 import { useToast } from '../hooks/useToast';
 
 const DETAIL_WIDTH_KEY = 'cortxt-detail-width';
@@ -15,6 +16,7 @@ function getInitialWidth() {
 }
 
 export default function DetailPanel({ project, onClose }) {
+  const navigate = useNavigate();
   const [width, setWidth] = useState(getInitialWidth);
   const [analyzing, setAnalyzing] = useState(false);
   const { toast } = useToast();
@@ -91,30 +93,17 @@ export default function DetailPanel({ project, onClose }) {
         <div style={{ width: 10, height: 10, borderRadius: '50%', background: stageColors[project.stage] || '#858585' }} />
         <h2 style={{ fontSize: 14, fontWeight: 600, margin: 0, color: '#ffffff' }}>{project.title || project.slug}</h2>
       </div>
-      <button
-        onClick={async () => {
-          const stages = ['idea', 'building', 'working'];
-          const currentIdx = stages.indexOf(project.stage);
-          const nextStage = stages[(currentIdx + 1) % stages.length];
-          try {
-            await updateProject(project.slug, { status: nextStage });
-            toast(`Stage ändrad till ${nextStage}`, 'success');
-          } catch (err) {
-            toast(`Kunde inte ändra stage: ${err.message}`, 'error');
-          }
-        }}
+      <span
         style={{
           fontSize: 10, padding: '2px 6px', borderRadius: 3, fontWeight: 500,
           textTransform: 'uppercase', display: 'inline-block', marginTop: 4,
           background: `${stageColors[project.stage] || '#858585'}22`,
           color: stageColors[project.stage] || '#858585',
           border: `1px solid ${stageColors[project.stage] || '#858585'}44`,
-          cursor: 'pointer',
         }}
-        title="Klicka för att ändra stage"
       >
-        {project.stage} ↻
-      </button>
+        {project.stage}
+      </span>
       <button
         onClick={async () => {
           setAnalyzing(true);
@@ -186,6 +175,18 @@ export default function DetailPanel({ project, onClose }) {
           )}
         </div>
       </div>
+      <button
+        onClick={() => navigate(`/project/${project.slug}`)}
+        style={{
+          marginTop: 16, padding: '6px 12px', fontSize: 11,
+          background: 'transparent', border: '1px solid #3c3c3c', borderRadius: 3,
+          color: '#cccccc', cursor: 'pointer', width: '100%', textAlign: 'center',
+        }}
+        onMouseEnter={e => e.currentTarget.style.borderColor = '#6366f1'}
+        onMouseLeave={e => e.currentTarget.style.borderColor = '#3c3c3c'}
+      >
+        Öppna full vy →
+      </button>
     </div>
   );
 }

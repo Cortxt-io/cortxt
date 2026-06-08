@@ -1,5 +1,5 @@
 import { useState, useEffect, Component } from 'react';
-import { MemoryRouter } from 'react-router-dom';
+import { MemoryRouter, Routes, Route, useLocation } from 'react-router-dom';
 import { ToastProvider } from './components/ToastProvider';
 import useProjects from './hooks/useProjects';
 import usePending from './hooks/usePending';
@@ -15,6 +15,7 @@ import CommandPalette from './components/CommandPalette';
 import Breadcrumb from './components/Breadcrumb';
 import HomeView from './views/HomeView';
 import QuestBoardView from './views/QuestBoardView';
+import NodePage from './components/NodePage';
 
 class ErrorBoundary extends Component {
   constructor(props) {
@@ -54,6 +55,27 @@ function AppShell() {
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [hasNewEvents, setHasNewEvents] = useState(false);
 
+  const location = useLocation();
+
+  function computeNodeAncestry() {
+    const match = location.pathname.match(/^\/project\/(.+)$/);
+    if (!match || !projects.length) return null;
+    const slug = match[1];
+    const ancestry = [];
+    let current = projects.find(p => p.slug === slug);
+    while (current) {
+      ancestry.unshift({ slug: current.slug, title: current.title || current.slug });
+      if (current.part_of) {
+        current = projects.find(p => p.slug === current.part_of);
+      } else {
+        current = null;
+      }
+    }
+    return ancestry;
+  }
+
+  const nodeAncestry = computeNodeAncestry();
+
   useEffect(() => {
     if (hasNewEvents) {
       const timer = setTimeout(() => setHasNewEvents(false), 5000);
@@ -85,14 +107,22 @@ function AppShell() {
             activeMode={activeMode}
             selectedProject={selectedProject}
             onDeselectProject={() => setSelectedProject(null)}
+            nodeAncestry={nodeAncestry}
           />
           <div className="main-content-row">
             <div className="main-content">
-              {activeMode === 'graph' && <GraphCanvas projects={projects} loading={loading} error={error} onSelectNode={setSelectedProject} selectedProject={selectedProject} />}
-              {activeMode === 'quests' && <QuestBoardView projects={projects} />}
-              {activeMode === 'overview' && <HomeView brief={brief} loading={briefLoading} error={briefError} refresh={refreshBrief} generatedAt={briefGeneratedAt} projects={projects} />}
+              <Routes>
+                <Route path="/project/:slug" element={<NodePage projects={projects} />} />
+                <Route path="*" element={
+                  <>
+                    {activeMode === 'graph' && <GraphCanvas projects={projects} loading={loading} error={error} onSelectNode={setSelectedProject} selectedProject={selectedProject} />}
+                    {activeMode === 'quests' && <QuestBoardView projects={projects} />}
+                    {activeMode === 'overview' && <HomeView brief={brief} loading={briefLoading} error={briefError} refresh={refreshBrief} generatedAt={briefGeneratedAt} projects={projects} />}
+                  </>
+                } />
+              </Routes>
             </div>
-            {selectedProject && activeMode === 'graph' && (
+            {selectedProject && activeMode === 'graph' && !location.pathname.startsWith('/project/') && (
               <DetailPanel project={selectedProject} onClose={() => setSelectedProject(null)} />
             )}
           </div>

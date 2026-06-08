@@ -1,5 +1,22 @@
-export default function Breadcrumb({ activeMode, selectedProject, onDeselectProject }) {
+import { useNavigate } from 'react-router-dom';
+
+export default function Breadcrumb({ activeMode, selectedProject, onDeselectProject, nodeAncestry }) {
+  const navigate = useNavigate();
   const modeLabels = { graph: 'graf', quests: 'quests', overview: 'översikt' };
+
+  let segments;
+  if (nodeAncestry && nodeAncestry.length > 0) {
+    segments = nodeAncestry.map((node, i) => ({
+      label: node.title,
+      active: i === nodeAncestry.length - 1,
+      onClick: i < nodeAncestry.length - 1 ? () => navigate(`/project/${node.slug}`) : undefined,
+    }));
+  } else {
+    segments = [
+      { label: modeLabels[activeMode] || activeMode, active: !selectedProject, onClick: onDeselectProject },
+      ...(selectedProject ? [{ label: selectedProject.title || selectedProject.slug, active: true }] : []),
+    ];
+  }
 
   return (
     <div style={{
@@ -16,24 +33,22 @@ export default function Breadcrumb({ activeMode, selectedProject, onDeselectProj
       fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
     }}>
       <span
-        onClick={onDeselectProject}
+        onClick={() => navigate('/')}
         style={{ cursor: 'pointer', color: '#858585' }}
         onMouseEnter={e => e.currentTarget.style.color = '#cccccc'}
         onMouseLeave={e => e.currentTarget.style.color = '#858585'}
       >cortxt</span>
-      <span style={{ color: '#4e4e4e' }}>&gt;</span>
-      <span
-        onClick={onDeselectProject}
-        style={{ cursor: 'pointer', color: selectedProject ? '#858585' : '#cccccc' }}
-        onMouseEnter={e => e.currentTarget.style.color = '#cccccc'}
-        onMouseLeave={e => e.currentTarget.style.color = selectedProject ? '#858585' : '#cccccc'}
-      >{modeLabels[activeMode] || activeMode}</span>
-      {selectedProject && (
-        <>
+      {segments.map((seg, i) => (
+        <span key={i} style={{ display: 'contents' }}>
           <span style={{ color: '#4e4e4e' }}>&gt;</span>
-          <span style={{ color: '#cccccc' }}>{selectedProject.title || selectedProject.slug}</span>
-        </>
-      )}
+          <span
+            onClick={seg.onClick}
+            style={{ cursor: seg.onClick ? 'pointer' : 'default', color: seg.active ? '#cccccc' : '#858585' }}
+            onMouseEnter={e => { if (seg.onClick) e.currentTarget.style.color = '#cccccc'; }}
+            onMouseLeave={e => { if (seg.onClick) e.currentTarget.style.color = seg.active ? '#cccccc' : '#858585'; }}
+          >{seg.label}</span>
+        </span>
+      ))}
     </div>
   );
 }

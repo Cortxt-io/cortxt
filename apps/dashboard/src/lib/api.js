@@ -203,3 +203,12 @@ export async function fetchDevlog() {
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
   return res.json();
 }
+
+export async function suggestQuest(slug) {
+  const res = await fetch(`${BASE}/api/project/${slug}/suggest-quest`, {
+    method: 'POST',
+    headers: authHeaders(),
+  });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return res.json();
+}
