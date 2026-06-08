@@ -192,7 +192,7 @@ export default function TimelineZone({ slug, meta, sections, zoneSections, proje
     let cancelled = false;
     setQuestsLoading(true);
     fetchQuests({ slug })
-      .then((data) => { if (!cancelled) setQuests(data); })
+      .then((data) => { if (!cancelled) setQuests(data.quests || data || []); })
       .catch(() => {})
       .finally(() => { if (!cancelled) setQuestsLoading(false); });
     return () => { cancelled = true; };
@@ -263,7 +263,7 @@ export default function TimelineZone({ slug, meta, sections, zoneSections, proje
       actSet(`activate-${id}`, 'done', null);
       // Refresh quests
       const data = await fetchQuests({ slug });
-      setQuests(data);
+      setQuests(data.quests || data || []);
       setTimeout(() => actSet(`activate-${id}`, 'idle', null), 2000);
     } catch (err) {
       actSet(`activate-${id}`, 'error', err.message);
@@ -276,7 +276,7 @@ export default function TimelineZone({ slug, meta, sections, zoneSections, proje
       await completeQuest(id);
       actSet(`complete-${id}`, 'done', null);
       const data = await fetchQuests({ slug });
-      setQuests(data);
+      setQuests(data.quests || data || []);
       setTimeout(() => actSet(`complete-${id}`, 'idle', null), 2000);
     } catch (err) {
       actSet(`complete-${id}`, 'error', err.message);
@@ -297,7 +297,7 @@ export default function TimelineZone({ slug, meta, sections, zoneSections, proje
       questSet('create', 'done', null);
       clearSuggestion();
       const data = await fetchQuests({ slug });
-      setQuests(data);
+      setQuests(data.quests || data || []);
       setTimeout(() => questSet('create', 'idle', null), 2000);
     } catch (err) {
       questSet('create', 'error', err.message);
