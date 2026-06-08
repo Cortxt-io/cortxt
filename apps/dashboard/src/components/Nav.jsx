@@ -9,10 +9,10 @@ export default function Nav({ onToggleGraph, graphOpen }) {
         position: 'sticky',
         top: 0,
         zIndex: 100,
-        background: 'rgba(10,10,10,0.92)',
+        background: 'rgba(9,9,11,0.92)',
         backdropFilter: 'blur(8px)',
         borderBottom: '1px solid var(--border)',
-        padding: '1rem 1.5rem',
+        padding: '0.75rem 1.5rem',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
@@ -21,9 +21,6 @@ export default function Nav({ onToggleGraph, graphOpen }) {
       <button
         onClick={() => navigate('/')}
         style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '0.75rem',
           background: 'none',
           border: 'none',
           cursor: 'pointer',
@@ -32,23 +29,14 @@ export default function Nav({ onToggleGraph, graphOpen }) {
       >
         <span
           style={{
-            fontWeight: 800,
-            fontSize: '1.25rem',
-            color: 'var(--text)',
+            fontFamily: '"JetBrains Mono", monospace',
+            fontWeight: 600,
+            fontSize: '1rem',
+            color: '#fff',
             letterSpacing: '-0.02em',
           }}
         >
-          Cortxt
-        </span>
-        <span
-          style={{
-            fontFamily: '"JetBrains Mono", monospace',
-            fontSize: '0.7rem',
-            color: 'var(--muted)',
-            letterSpacing: '0.04em',
-          }}
-        >
-          Dashboard
+          cortxt
         </span>
       </button>
 
@@ -56,17 +44,17 @@ export default function Nav({ onToggleGraph, graphOpen }) {
         onClick={onToggleGraph}
         style={{
           fontFamily: '"JetBrains Mono", monospace',
-          fontSize: '0.75rem',
-          padding: '0.4rem 0.9rem',
-          borderRadius: '6px',
+          fontSize: '0.7rem',
+          padding: '0.3rem 0.7rem',
+          borderRadius: '4px',
           cursor: 'pointer',
           border: `1px solid ${graphOpen ? 'var(--accent)' : 'var(--border)'}`,
           background: graphOpen ? 'var(--accent)' : 'transparent',
           color: graphOpen ? '#fff' : 'var(--muted)',
-          transition: 'all 0.15s ease',
+          transition: 'color 0.15s ease, border-color 0.15s ease, background 0.15s ease',
         }}
       >
-        {graphOpen ? '✕ Close' : '⬡ Graph'}
+        {graphOpen ? 'close' : 'graph'}
       </button>
     </nav>
   );

@@ -27,7 +27,7 @@ export default function ProjectCard({ project }) {
   return (
     <div
       onClick={() => navigate('/project/' + project.slug)}
-      className="cursor-pointer rounded-lg border border-border bg-surface p-5 transition-all hover:border-accent hover:shadow-[0_0_20px_rgba(99,102,241,0.12)]"
+      className="cursor-pointer rounded border border-border bg-surface p-4 transition-colors hover:border-accent"
     >
       {/* Title */}
       <h3 className="text-lg font-bold text-text mb-2">{project.title}</h3>

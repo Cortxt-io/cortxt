@@ -1,21 +1,20 @@
-import { useState, useCallback, Component } from 'react';
-import { HashRouter, Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
+import { useState, useEffect, Component } from 'react';
+import { MemoryRouter } from 'react-router-dom';
+import { ToastProvider } from './components/ToastProvider';
 import useProjects from './hooks/useProjects';
 import usePending from './hooks/usePending';
 import useBrief from './hooks/useBrief';
-import useIsMobile from './hooks/useIsMobile';
-import Nav from './components/Nav';
-import Sidebar from './components/Sidebar';
-import GraphView from './components/GraphView';
-import ProjectDetail from './components/ProjectDetail';
+import useQuests from './hooks/useQuests';
+import useKeyboard from './hooks/useKeyboard';
+import ActivityBar from './components/ActivityBar';
+import BottomPanel from './components/BottomPanel';
+import StatusBar from './components/StatusBar';
+import GraphCanvas from './components/GraphCanvas';
+import DetailPanel from './components/DetailPanel';
+import CommandPalette from './components/CommandPalette';
+import Breadcrumb from './components/Breadcrumb';
 import HomeView from './views/HomeView';
-import BriefView from './views/BriefView';
-import PortfolioView from './views/PortfolioView';
-import MetricsView from './views/MetricsView';
-import PendingView from './views/PendingView';
-import Timeline from './components/Timeline';
 import QuestBoardView from './views/QuestBoardView';
-import QuestDetailView from './views/QuestDetailView';
 
 class ErrorBoundary extends Component {
   constructor(props) {
@@ -48,89 +47,58 @@ function AppShell() {
   const { projects, loading, error } = useProjects();
   const { pending, loading: pendingLoading, error: pendingError, refresh: refreshPending } = usePending();
   const { brief, loading: briefLoading, error: briefError, refresh: refreshBrief, generatedAt: briefGeneratedAt } = useBrief();
-  const [showGraph, setShowGraph] = useState(false);
-  const navigate = useNavigate();
-  const location = useLocation();
-  const isMobile = useIsMobile();
+  const { quests } = useQuests();
 
-  const handleGraphNavigate = useCallback((slug) => {
-    navigate('/project/' + slug);
-    setShowGraph(false);
-  }, [navigate]);
+  const [activeMode, setActiveMode] = useState('graph');
+  const [selectedProject, setSelectedProject] = useState(null);
+  const [paletteOpen, setPaletteOpen] = useState(false);
+  const [hasNewEvents, setHasNewEvents] = useState(false);
 
-  const navItems = [
-    { path: '/', label: 'Hem', icon: '⌂' },
-    { path: '/brief', label: 'Brief', icon: '◈' },
-    { path: '/quests', label: 'Quests', icon: '⚡' },
-    { path: '/portfolio', label: 'Portfolio', icon: '⊞' },
-    { path: '/timeline', label: 'Tidslinje', icon: '◎' },
-    { path: '/metrics', label: 'Metrics', icon: '▦' },
-  ];
+  useEffect(() => {
+    if (hasNewEvents) {
+      const timer = setTimeout(() => setHasNewEvents(false), 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [hasNewEvents]);
+
+  useKeyboard({
+    onModeChange: setActiveMode,
+    onClosePanel: () => setSelectedProject(null),
+    onOpenPalette: () => setPaletteOpen(true),
+    onClosePalette: () => setPaletteOpen(false),
+    paletteOpen,
+  });
 
   return (
     <>
-      <Nav onToggleGraph={() => setShowGraph((v) => !v)} graphOpen={showGraph} />
-
-      {showGraph && (
-        <GraphView
-          projects={projects}
-          onClose={() => setShowGraph(false)}
-          onNavigate={handleGraphNavigate}
-        />
-      )}
-
-      <div style={{ display: 'flex', minHeight: 'calc(100vh - 60px)' }}>
-        <Sidebar navItems={navItems} currentPath={location.pathname} />
-        <main style={{ flex: 1, overflow: 'auto', minWidth: 0, paddingBottom: isMobile ? 70 : 0 }}>
-          <Routes>
-            <Route
-              path="/"
-              element={
-                <HomeView
-                  brief={brief}
-                  loading={briefLoading}
-                  error={briefError}
-                  refresh={refreshBrief}
-                  generatedAt={briefGeneratedAt}
-                  projects={projects}
-                />
-              }
-            />
-            <Route
-              path="/brief"
-              element={
-                <BriefView
-                  brief={brief}
-                  loading={briefLoading}
-                  error={briefError}
-                  refresh={refreshBrief}
-                  generatedAt={briefGeneratedAt}
-                  pending={pending}
-                  pendingLoading={pendingLoading}
-                  projects={projects}
-                  refreshPending={refreshPending}
-                  refreshAnalyze={refreshPending}
-                />
-              }
-            />
-            <Route
-              path="/portfolio"
-              element={<PortfolioView projects={projects} loading={loading} error={error} />}
-            />
-            <Route
-              path="/metrics"
-              element={<MetricsView projects={projects} />}
-            />
-            <Route path="/analyze" element={<Navigate to="/portfolio" replace />} />
-            {/* #/pending kept for backwards-compat, redirects to #/portfolio */}
-            <Route path="/pending" element={<PendingView />} />
-            <Route path="/activity" element={<Navigate to="/timeline" replace />} />
-            <Route path="/timeline" element={<Timeline projects={projects} />} />
-            <Route path="/quests" element={<QuestBoardView projects={projects} />} />
-            <Route path="/quest/:questId" element={<QuestDetailView projects={projects} />} />
-            <Route path="/project/:slug" element={<ProjectDetail projects={projects} />} />
-          </Routes>
-        </main>
+      <CommandPalette
+        isOpen={paletteOpen}
+        onClose={() => setPaletteOpen(false)}
+        projects={projects}
+        onSelectProject={(p) => { setSelectedProject(p); setActiveMode('graph'); }}
+        onChangeMode={setActiveMode}
+      />
+      <div className="ide-shell">
+        <ActivityBar activeMode={activeMode} onModeChange={setActiveMode} questCount={quests.length} />
+        <div className="main-area">
+          <Breadcrumb
+            activeMode={activeMode}
+            selectedProject={selectedProject}
+            onDeselectProject={() => setSelectedProject(null)}
+          />
+          <div className="main-content-row">
+            <div className="main-content">
+              {activeMode === 'graph' && <GraphCanvas projects={projects} loading={loading} error={error} onSelectNode={setSelectedProject} selectedProject={selectedProject} />}
+              {activeMode === 'quests' && <QuestBoardView projects={projects} />}
+              {activeMode === 'overview' && <HomeView brief={brief} loading={briefLoading} error={briefError} refresh={refreshBrief} generatedAt={briefGeneratedAt} projects={projects} />}
+            </div>
+            {selectedProject && activeMode === 'graph' && (
+              <DetailPanel project={selectedProject} onClose={() => setSelectedProject(null)} />
+            )}
+          </div>
+          <BottomPanel projects={projects} brief={brief} briefLoading={briefLoading} onNewEvents={() => setHasNewEvents(true)} />
+        </div>
+        <StatusBar projectCount={projects.length} questCount={quests.length} hasNewEvents={hasNewEvents} />
       </div>
     </>
   );
@@ -138,10 +106,12 @@ function AppShell() {
 
 export default function App() {
   return (
-    <HashRouter>
-      <ErrorBoundary>
-        <AppShell />
-      </ErrorBoundary>
-    </HashRouter>
+    <MemoryRouter>
+      <ToastProvider>
+        <ErrorBoundary>
+          <AppShell />
+        </ErrorBoundary>
+      </ToastProvider>
+    </MemoryRouter>
   );
 }

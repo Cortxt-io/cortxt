@@ -1,9 +1,8 @@
 export const content = {
   hero: {
-    badge: 'Structured context for developers',
-    headline: ["Copilot writes your code.", "Cortxt decides what's worth building."],
+    headline: ["Structured context", "for AI-assisted development."],
     subtext:
-      "Every project. Every decision. Every tradeoff. Structured, versioned and ready for your next AI session – without paying to re-explain it. Your portfolio's memory. Built on git.",
+      "Every project decision — structured, versioned, and ready for your next session. No re-explaining. No wasted tokens.",
   },
   cns: {
     label: 'Foundation',
@@ -71,13 +70,6 @@ risks:
       'Approved changes are committed',
       "Tomorrow's digest knows what happened today",
     ],
-  },
-  vision:
-    'The next frontier in software development isn\'t writing more code. It\'s knowing which code to write, when, and why. As AI tools become ubiquitous, the differentiator won\'t be who uses AI – it\'s who uses it efficiently. Token cost per decision. Context quality per session. Signal-to-noise ratio across an entire development portfolio. Cortxt is built for that world.',
-  builder: {
-    name: 'Rikard Andersson',
-    bio: 'Rikard Andersson is a self-taught fullstack developer who thinks in systems and builds for the long term. Cortxt started as a personal tool for managing a growing portfolio of ideas. It became a platform for a question that keeps him up at night: as AI becomes the default development environment, who controls the context – and at what cost? The developer who structures their knowledge today will outcompete the one who pays to re-explain it tomorrow.',
-    github: 'https://github.com/rian010194/cortxt',
   },
   pipeline: {
     tracks: [

@@ -13,7 +13,7 @@ import { content } from '../data/content';
 const nodeStyle = {
   background: 'var(--surface)',
   border: '1px solid var(--border)',
-  borderRadius: '8px',
+  borderRadius: '4px',
   padding: '10px 16px',
   fontFamily: '"JetBrains Mono", monospace',
   fontSize: '0.8rem',
@@ -29,7 +29,7 @@ function PipelineNode({ data }) {
   return (
     <div style={nodeStyle}>
       <Handle type="target" position={Position.Top}
-        style={{ background: '#334155', border: 'none' }} />
+        style={{ background: 'var(--muted)', border: 'none' }} />
       {data.label}
       {data.sublabel && (
         <div style={{ fontSize: '0.65rem', color: 'var(--muted)', marginTop: '4px' }}>
@@ -37,7 +37,7 @@ function PipelineNode({ data }) {
         </div>
       )}
       <Handle type="source" position={Position.Bottom}
-        style={{ background: '#334155', border: 'none' }} />
+        style={{ background: 'var(--muted)', border: 'none' }} />
     </div>
   );
 }
@@ -91,8 +91,8 @@ const RIGHT_X  = 500;  // internal track
 const CENTER_X = 280;  // center merge column
 const Y_STEP   = 120;
 
-const edgeStyle = { stroke: '#334155', strokeWidth: 1.5 };
-const markerEnd = { type: MarkerType.ArrowClosed, color: '#334155' };
+const edgeStyle = { stroke: '#858585', strokeWidth: 1.5 };
+const markerEnd = { type: MarkerType.ArrowClosed, color: '#858585' };
 
 // ── Build nodes from content ───────────────────────────────
 function buildNodes(pipeline) {
@@ -234,13 +234,13 @@ function buildEdges(pipeline) {
   // Both last track nodes → merge (claude) — accent color highlights convergence
   edges.push({
     ...edge('e-ext-merge', extNodes[extNodes.length - 1].id, pipeline.mergeNode.id),
-    style: { stroke: '#6366f1', strokeWidth: 2 },
-    markerEnd: { type: MarkerType.ArrowClosed, color: '#6366f1' },
+    style: { stroke: '#007acc', strokeWidth: 2 },
+    markerEnd: { type: MarkerType.ArrowClosed, color: '#007acc' },
   });
   edges.push({
     ...edge('e-int-merge', intNodes[intNodes.length - 1].id, pipeline.mergeNode.id),
-    style: { stroke: '#6366f1', strokeWidth: 2 },
-    markerEnd: { type: MarkerType.ArrowClosed, color: '#6366f1' },
+    style: { stroke: '#007acc', strokeWidth: 2 },
+    markerEnd: { type: MarkerType.ArrowClosed, color: '#007acc' },
   });
 
   // Center chain: claude → vault → approved
@@ -268,7 +268,7 @@ export default function Pipeline() {
   return (
     <section id="pipeline" className="section">
       <div className="container">
-        <div className="center fade-in" style={{ marginBottom: '3rem' }}>
+        <div className="center" style={{ marginBottom: '3rem' }}>
           <div className="section-label">Architecture</div>
           <h2 className="section-title">The full picture</h2>
           <p className="section-sub">From external signals to structured decisions</p>
@@ -280,7 +280,7 @@ export default function Pipeline() {
             height: 1050,
             width: '100%',
             background: 'var(--surface)',
-            borderRadius: '12px',
+            borderRadius: '4px',
             border: '1px solid var(--border)',
             overflow: 'hidden',
           }}
@@ -306,7 +306,7 @@ export default function Pipeline() {
         </div>
 
         {/* Scoring Studio note */}
-        <div className="scoring-note fade-in">
+        <div className="scoring-note">
           <span>⚙️</span>
           <p>
             <strong>{pipeline.configNote.label}</strong> —{' '}
@@ -316,7 +316,6 @@ export default function Pipeline() {
 
         {/* Future nodes legend */}
         <div
-          className="fade-in"
           style={{
             display: 'grid',
             gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))',
@@ -331,7 +330,7 @@ export default function Pipeline() {
               style={{
                 background: 'var(--surface)',
                 border: '1px dashed var(--border)',
-                borderRadius: '8px',
+                borderRadius: '4px',
                 padding: '0.6rem 1rem',
                 fontFamily: '"JetBrains Mono", monospace',
                 fontSize: '0.75rem',

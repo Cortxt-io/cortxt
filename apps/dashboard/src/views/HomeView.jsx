@@ -36,8 +36,8 @@ export default function HomeView({
         <div style={{ marginTop: 16 }}>
           <Timeline projects={projects} />
         </div>
-        <div style={{ height: 120, marginTop: 40, background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 8, opacity: 0.5 }}>
-          <div style={{ padding: 20, fontSize: 13, color: 'var(--muted)' }}>Laddar brief…</div>
+        <div style={{ height: 120, marginTop: 40, background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 4, opacity: 0.5 }}>
+          <div style={{ padding: 16, fontSize: 13, color: 'var(--muted)' }}>Laddar brief…</div>
         </div>
       </div>
     );
@@ -67,8 +67,8 @@ export default function HomeView({
         <div style={{
           background: 'var(--surface)',
           border: '1px solid var(--border)',
-          borderRadius: 8,
-          padding: 20,
+          borderRadius: 4,
+          padding: 16,
           marginBottom: 16,
         }}>
           {/* Situation */}
@@ -121,8 +121,8 @@ export default function HomeView({
                   style={{
                     background: q.status === 'in_progress' ? 'rgba(251,191,36,0.06)' : 'rgba(99,102,241,0.06)',
                     border: q.status === 'in_progress' ? '1px solid rgba(251,191,36,0.2)' : '1px solid rgba(99,102,241,0.2)',
-                    borderRadius: 6,
-                    padding: '8px 12px',
+                    borderRadius: 4,
+                    padding: '6px 10px',
                     cursor: 'pointer',
                     display: 'flex',
                     alignItems: 'center',

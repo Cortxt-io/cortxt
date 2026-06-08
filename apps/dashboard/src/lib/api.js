@@ -1,4 +1,4 @@
-const BASE = 'https://project-cns-production.up.railway.app';
+const BASE = import.meta.env.VITE_API_BASE || '';
 const TOKEN = import.meta.env.VITE_API_TOKEN ?? '';
 
 function authHeaders() {

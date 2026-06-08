@@ -1,13 +1,9 @@
-import { content } from '../data/content';
-
 export default function Footer() {
-  const { builder } = content;
-
   return (
     <footer
       style={{
         borderTop: '1px solid var(--border)',
-        padding: '1.75rem 1.5rem',
+        padding: '1.5rem 1.5rem',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
@@ -24,16 +20,17 @@ export default function Footer() {
           color: 'var(--muted)',
         }}
       >
-        Cortxt · cortxt.io · © 2026
+        © 2026 cortxt
       </span>
       <a
-        href={builder.github}
+        href="https://github.com/rian010194/cortxt"
         target="_blank"
         rel="noopener noreferrer"
         style={{
           fontFamily: '"JetBrains Mono", monospace',
           fontSize: '0.78rem',
           color: 'var(--accent)',
+          textDecoration: 'none',
         }}
       >
         GitHub

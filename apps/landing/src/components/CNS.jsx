@@ -8,7 +8,7 @@ export default function CNS() {
       <div className="container">
 
         {/* ── Part 1: Intro ─────────────────────────────── */}
-        <div className="fade-in" style={{ marginBottom: '4rem' }}>
+        <div style={{ marginBottom: '4rem' }}>
           <div className="section-label">{cns.label}</div>
           <h2
             style={{
@@ -33,7 +33,6 @@ export default function CNS() {
 
         {/* ── Part 2: Comparison cards ──────────────────── */}
         <div
-          className="fade-in"
           style={{
             display: 'grid',
             gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
@@ -47,9 +46,8 @@ export default function CNS() {
               style={{
                 background: 'var(--surface)',
                 border: `1px solid ${item.highlight ? 'var(--accent)' : 'var(--border)'}`,
-                borderRadius: '8px',
+                borderRadius: '4px',
                 padding: '1.5rem',
-                boxShadow: item.highlight ? '0 0 20px rgba(99,102,241,0.15)' : 'none',
               }}
             >
               {/* Tool header */}
@@ -102,7 +100,7 @@ export default function CNS() {
         </div>
 
         {/* ── Part 3: Knowledge layers + code example ───── */}
-        <div className="fade-in" style={{ marginBottom: '4rem' }}>
+        <div style={{ marginBottom: '4rem' }}>
           <div className="section-label" style={{ marginBottom: '1.5rem' }}>Knowledge structure</div>
 
           {/* Layer list */}
@@ -110,7 +108,7 @@ export default function CNS() {
             style={{
               background: 'var(--surface)',
               border: '1px solid var(--border)',
-              borderRadius: '8px',
+              borderRadius: '4px',
               overflow: 'hidden',
               marginBottom: '1.5rem',
             }}
@@ -148,10 +146,10 @@ export default function CNS() {
           {/* Code example */}
           <pre
             style={{
-              background: '#0d0d0d',
+              background: '#1b1b1b',
               border: '1px solid var(--border)',
               borderLeft: '3px solid var(--accent)',
-              borderRadius: '8px',
+              borderRadius: '4px',
               padding: '1.5rem',
               overflowX: 'auto',
               margin: 0,
@@ -161,7 +159,7 @@ export default function CNS() {
               style={{
                 fontFamily: '"JetBrains Mono", monospace',
                 fontSize: '0.8rem',
-                color: '#94a3b8',
+                color: 'var(--text)',
                 whiteSpace: 'pre',
               }}
             >
@@ -171,7 +169,7 @@ export default function CNS() {
         </div>
 
         {/* ── Part 4: Git as backbone ───────────────────── */}
-        <div className="fade-in">
+        <div>
           <div className="section-label" style={{ marginBottom: '0.75rem' }}>Audit trail</div>
           <h3
             style={{

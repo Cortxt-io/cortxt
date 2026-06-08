@@ -1,14 +1,22 @@
 export default function Nav() {
+  const linkStyle = {
+    fontFamily: '"JetBrains Mono", monospace',
+    fontSize: '0.8rem',
+    color: 'var(--muted)',
+    textDecoration: 'none',
+    transition: 'color 0.15s',
+  };
+
   return (
     <nav
       style={{
         position: 'sticky',
         top: 0,
         zIndex: 100,
-        background: 'rgba(10,10,10,0.92)',
+        background: 'rgba(30,30,30,0.95)',
         backdropFilter: 'blur(8px)',
         borderBottom: '1px solid var(--border)',
-        padding: '1rem 1.5rem',
+        padding: '0.75rem 1.5rem',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
@@ -16,27 +24,43 @@ export default function Nav() {
     >
       <span
         style={{
-          fontWeight: 800,
-          fontSize: '1.25rem',
-          color: 'var(--text)',
+          fontFamily: '"JetBrains Mono", monospace',
+          fontWeight: 700,
+          fontSize: '1rem',
+          color: 'var(--text-bright)',
           letterSpacing: '-0.02em',
         }}
       >
-        Cortxt
+        cortxt
       </span>
-      <span
-        style={{
-          fontFamily: '"JetBrains Mono", monospace',
-          fontSize: '0.7rem',
-          background: 'var(--accent)',
-          color: '#fff',
-          padding: '0.25rem 0.75rem',
-          borderRadius: '9999px',
-          letterSpacing: '0.02em',
-        }}
-      >
-        Coming Soon
-      </span>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
+        <a
+          href="#"
+          style={linkStyle}
+          onMouseEnter={(e) => (e.target.style.color = 'var(--text-bright)')}
+          onMouseLeave={(e) => (e.target.style.color = 'var(--muted)')}
+        >
+          Docs
+        </a>
+        <a
+          href="https://github.com/rian010194/cortxt"
+          target="_blank"
+          rel="noopener noreferrer"
+          style={linkStyle}
+          onMouseEnter={(e) => (e.target.style.color = 'var(--text-bright)')}
+          onMouseLeave={(e) => (e.target.style.color = 'var(--muted)')}
+        >
+          GitHub
+        </a>
+        <a
+          href="#"
+          style={linkStyle}
+          onMouseEnter={(e) => (e.target.style.color = 'var(--text-bright)')}
+          onMouseLeave={(e) => (e.target.style.color = 'var(--muted)')}
+        >
+          Dashboard
+        </a>
+      </div>
     </nav>
   );
 }

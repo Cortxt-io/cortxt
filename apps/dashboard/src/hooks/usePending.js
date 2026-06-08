@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 
-const API = 'https://project-cns-production.up.railway.app';
+const API = import.meta.env.VITE_API_BASE || '';
 
 export default function usePending() {
   const [pending, setPending] = useState([]);

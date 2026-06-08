@@ -6,15 +6,17 @@ export default {
       colors: {
         bg:       'var(--bg)',
         surface:  'var(--surface)',
+        'surface-2': 'var(--surface-2)',
         border:   'var(--border)',
         text:     'var(--text)',
+        'text-bright': 'var(--text-bright)',
         muted:    'var(--muted)',
         accent:   'var(--accent)',
         'accent-h': 'var(--accent-h)',
         success:  'var(--success)',
       },
       fontFamily: {
-        sans:  ['Inter', 'sans-serif'],
+        sans:  ['-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'Roboto', 'sans-serif'],
         mono:  ['"JetBrains Mono"', 'monospace'],
       },
     },

@@ -20,10 +20,10 @@ export default function Sidebar({ navItems, currentPath }) {
           right: 0,
           zIndex: 100,
           display: 'flex',
-          background: 'rgba(10,10,10,0.96)',
+          background: 'rgba(9,9,11,0.96)',
           backdropFilter: 'blur(8px)',
           borderTop: '1px solid var(--border)',
-          height: 60,
+          height: 52,
           paddingBottom: 'env(safe-area-inset-bottom)',
         }}
       >
@@ -36,23 +36,20 @@ export default function Sidebar({ navItems, currentPath }) {
               style={{
                 flex: 1,
                 display: 'flex',
-                flexDirection: 'column',
                 alignItems: 'center',
                 justifyContent: 'center',
-                gap: 2,
-                padding: '6px 4px',
+                padding: '6px 2px',
                 border: 'none',
                 borderTop: active ? '2px solid var(--accent)' : '2px solid transparent',
                 background: 'transparent',
                 color: active ? 'var(--text)' : 'var(--muted)',
                 cursor: 'pointer',
                 WebkitTapHighlightColor: 'transparent',
+                fontFamily: '"JetBrains Mono", monospace',
+                fontSize: '0.6rem',
               }}
             >
-              <span style={{ fontSize: '1.1rem', lineHeight: 1 }}>{item.icon}</span>
-              <span style={{ fontSize: '0.6rem', fontFamily: '"JetBrains Mono", monospace' }}>
-                {item.label}
-              </span>
+              {item.label}
             </button>
           );
         })}
@@ -63,7 +60,7 @@ export default function Sidebar({ navItems, currentPath }) {
   return (
     <nav
       style={{
-        width: 220,
+        width: 200,
         flexShrink: 0,
         background: 'var(--surface)',
         borderRight: '1px solid var(--border)',
@@ -83,24 +80,24 @@ export default function Sidebar({ navItems, currentPath }) {
             style={{
               display: 'flex',
               alignItems: 'center',
-              gap: '0.75rem',
+              gap: '0.5rem',
               width: '100%',
-              padding: '0.75rem 1.25rem',
+              padding: '0.5rem 1rem',
               borderLeft: active
-                ? '3px solid var(--accent)'
-                : '3px solid transparent',
+                ? '2px solid var(--accent)'
+                : '2px solid transparent',
               background: active
                 ? 'rgba(99,102,241,0.08)'
                 : 'transparent',
               color: active ? 'var(--text)' : 'var(--muted)',
               fontFamily: '"JetBrains Mono", monospace',
-              fontSize: '0.8rem',
+              fontSize: '0.75rem',
               cursor: 'pointer',
               borderRight: 'none',
               borderTop: 'none',
               borderBottom: 'none',
               textAlign: 'left',
-              transition: 'all 0.15s ease',
+              transition: 'color 0.15s ease, background 0.15s ease',
             }}
             onMouseEnter={(e) => {
               if (!active) {
@@ -115,7 +112,6 @@ export default function Sidebar({ navItems, currentPath }) {
               }
             }}
           >
-            {item.icon && <span style={{ fontSize: '1rem' }}>{item.icon}</span>}
             <span>{item.label}</span>
             {item.badge > 0 && (
               <span

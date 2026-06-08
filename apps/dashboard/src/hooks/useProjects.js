@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 
-const API = 'https://project-cns-production.up.railway.app';
+const API = import.meta.env.VITE_API_BASE || '';
 
 export default function useProjects() {
   const [projects, setProjects] = useState([]);
