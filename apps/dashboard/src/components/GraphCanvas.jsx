@@ -12,6 +12,8 @@ import ReactFlow, {
 } from 'reactflow';
 import 'reactflow/dist/style.css';
 import ELK from 'elkjs/lib/elk.bundled.js';
+import ContainerGraphCanvas from './ContainerGraphCanvas';
+const USE_CONTAINER_GRAPH = true;
 import GraphNode from './GraphNode';
 import BulkActions from './BulkActions';
 import ContextMenu from './ContextMenu';
@@ -331,6 +333,9 @@ function GraphCanvasInner({ projects = [], loading, error, onSelectNode, selecte
 }
 
 export default function GraphCanvas(props) {
+  if (USE_CONTAINER_GRAPH) {
+    return <ContainerGraphCanvas {...props} />;
+  }
   return (
     <ReactFlowProvider>
       <GraphCanvasInner {...props} />
