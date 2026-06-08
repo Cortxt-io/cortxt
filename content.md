@@ -31,7 +31,7 @@ pipeline:
       label: "Internal World"
       nodes:
         - id: n-projmd
-          label: "project.md files"
+          label: "node.md files"
           status: live
         - id: n-cnswatch
           label: "cns-watch"

@@ -28,7 +28,7 @@ export const content = {
     ],
     layers: [
       {
-        file: 'project.md',
+        file: 'node.md',
         description:
           'What, why and where you are. Status, MVP stage, risks, ROI – validated against a schema on every write.',
       },
@@ -86,7 +86,7 @@ risks:
         id: 'internal',
         label: 'Internal World',
         nodes: [
-          { id: 'proj-md', label: 'project.md files', status: 'live' },
+          { id: 'proj-md', label: 'node.md files', status: 'live' },
           { id: 'cns-watch', label: 'cns-watch', status: 'live' },
           { id: 'cns-devwatch', label: 'cns-devwatch', status: 'live', sublabel: 'git diff output' },
         ],

@@ -77,7 +77,7 @@ export async function pushQuestToPlanning(slug, quest) {
 }
 
 export async function updateProject(slug, fields) {
-  const res = await fetch(`${BASE}/api/project/${slug}`, {
+  const res = await fetch(`${BASE}/api/node/${slug}`, {
     method: 'PATCH',
     headers: authHeaders(),
     body: JSON.stringify({ fields }),
@@ -205,7 +205,7 @@ export async function fetchDevlog() {
 }
 
 export async function suggestQuest(slug) {
-  const res = await fetch(`${BASE}/api/project/${slug}/suggest-quest`, {
+  const res = await fetch(`${BASE}/api/node/${slug}/suggest-quest`, {
     method: 'POST',
     headers: authHeaders(),
   });

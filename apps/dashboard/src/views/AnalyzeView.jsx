@@ -137,7 +137,7 @@ function AnalyzeSection({ analyzeProjects, analyzeLoading, refreshAnalyze }) {
         <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
           <thead>
             <tr style={{ borderBottom: '1px solid var(--border)', textAlign: 'left' }}>
-              <th style={{ padding: '6px 12px 6px 0', color: 'var(--muted)', fontWeight: 500 }}>Projekt</th>
+              <th style={{ padding: '6px 12px 6px 0', color: 'var(--muted)', fontWeight: 500 }}>Nod</th>
               <th style={{ padding: '6px 12px', color: 'var(--muted)', fontWeight: 500 }}>Status</th>
               <th style={{ padding: '6px 12px', color: 'var(--muted)', fontWeight: 500 }}>Uppdaterad</th>
               <th style={{ padding: '6px 12px', color: 'var(--muted)', fontWeight: 500 }}>Förslag</th>

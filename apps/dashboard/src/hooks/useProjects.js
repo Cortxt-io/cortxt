@@ -12,11 +12,11 @@ export default function useProjects() {
 
     async function fetchProjects() {
       try {
-        const res = await fetch(`${API}/api/projects`);
+        const res = await fetch(`${API}/api/nodes`);
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
         if (!cancelled) {
-          setProjects(data.projects ?? []);
+          setProjects(data.nodes ?? []);
           setError(null);
         }
       } catch (err) {

@@ -160,7 +160,7 @@ export default function MetricsView({ projects }) {
           >
             <thead>
               <tr>
-                {['Projekt', 'Kostnad', 'Värde', 'ROI'].map((h) => (
+                {['Nod', 'Kostnad', 'Värde', 'ROI'].map((h) => (
                   <th
                     key={h}
                     style={{
