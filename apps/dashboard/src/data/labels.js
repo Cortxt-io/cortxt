@@ -1,4 +1,11 @@
 ﻿// â”€â”€ Status labels â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+import { STATUSES, KINDS, NODE_STAGES } from '@cortxt/cns-schema';
+
+// Canonical node-model enum values live in @cortxt/cns-schema (single source,
+// mirrors Project-CNS/scripts/validator.py). Re-exported so existing imports
+// from './data/labels' keep working; the label/colour maps below are presentation.
+export { STATUSES, KINDS, NODE_STAGES };
+
 export const STATUS_LABELS = {
   idea: 'Idea',
   early_mvp: 'Early MVP',
