@@ -32,7 +32,7 @@ export default function BriefView({
     return (
       <div className="view-padding">
         <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 32 }}>
-          <h1 style={{ margin: 0, fontSize: 22, color: 'var(--text)' }}>Portfolio Brief</h1>
+          <h1 style={{ margin: 0, fontSize: 22, color: 'var(--text)' }}>Wiki Brief</h1>
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
           {[1, 2, 3].map((i) => (
@@ -50,7 +50,7 @@ export default function BriefView({
   if (error) {
     return (
       <div className="view-padding">
-        <h1 style={{ margin: '0 0 16px', fontSize: 22, color: 'var(--text)' }}>Portfolio Brief</h1>
+        <h1 style={{ margin: '0 0 16px', fontSize: 22, color: 'var(--text)' }}>Wiki Brief</h1>
         <div style={{ background: 'rgba(251,113,185,0.08)', border: '1px solid rgba(251,113,185,0.2)', borderRadius: 8, padding: 16, color: 'var(--text)' }}>
           <div style={{ fontWeight: 600, marginBottom: 8 }}>Kunde inte generera brief</div>
           <div style={{ fontSize: 13, color: 'var(--muted)', marginBottom: 12 }}>{error}</div>
@@ -65,9 +65,9 @@ export default function BriefView({
   if (!brief) {
     return (
       <div className="view-padding">
-        <h1 style={{ margin: '0 0 16px', fontSize: 22, color: 'var(--text)' }}>Portfolio Brief</h1>
+        <h1 style={{ margin: '0 0 16px', fontSize: 22, color: 'var(--text)' }}>Wiki Brief</h1>
         <div style={{ textAlign: 'center', padding: '48px 24px', color: 'var(--muted)', fontSize: 14 }}>
-          <p>Inga projekt i portföljen.</p>
+          <p>Inga noder i wiki.</p>
         </div>
       </div>
     );
