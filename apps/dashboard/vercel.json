@@ -1,0 +1,7 @@
+{
+  "buildCommand": "",
+  "outputDirectory": "dist",
+  "rewrites": [
+    { "source": "/api/:path*", "destination": "https://project-cns-production.up.railway.app/api/:path*" }
+  ]
+}
