@@ -58,7 +58,11 @@ export default function Timeline({ slug, projects = [] }) {
   const navigate = useNavigate();
   const { events, source, loading, error } = useEventstream(slug ? { slug } : {});
 
-  const dayGroups = useMemo(() => groupByDay(events), [events]);
+  const filteredEvents = useMemo(
+    () => (slug ? events.filter((ev) => ev.slug === slug) : events),
+    [events, slug]
+  );
+  const dayGroups = useMemo(() => groupByDay(filteredEvents), [filteredEvents]);
 
   // Build slug→title lookup
   const titleBySlug = useMemo(() => {

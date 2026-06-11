@@ -18,11 +18,11 @@ export default function QuestDetailView({ projects }) {
   function buildQuestPrompt() {
     if (!quest) return '';
     return (
-      `Projekt: ${quest.slug}\n` +
+      `Nod: ${quest.slug}\n` +
       `Quest: ${quest.title}\n\n` +
       `${quest.description ?? ''}\n\n` +
       `Motivering: ${quest.estimated_impact ?? ''}\n\n` +
-      `[Läs projects/${quest.slug}/project.md och relevanta planning/-filer innan du börjar.]`
+      `[Läs nodes/${quest.slug}/node.md och relevanta planning/-filer innan du börjar.]`
     );
   }
 
@@ -114,7 +114,7 @@ export default function QuestDetailView({ projects }) {
 
       {/* Project link */}
       <div style={{ marginBottom: 20 }}>
-        <span style={{ fontSize: 12, color: 'var(--muted)', fontFamily: 'var(--font-mono, monospace)' }}>Projekt: </span>
+        <span style={{ fontSize: 12, color: 'var(--muted)', fontFamily: 'var(--font-mono, monospace)' }}>Nod: </span>
         <button
           onClick={() => navigate(`/project/${quest.slug}`)}
           style={{ fontSize: 13, color: 'var(--accent)', cursor: 'pointer', background: 'none', border: 'none', padding: 0, fontWeight: 600, fontFamily: 'inherit' }}

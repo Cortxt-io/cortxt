@@ -17,7 +17,7 @@ export default function useProject(slug) {
       try {
         setLoading(true);
         setError(null);
-        const res = await fetch(`${API}/api/project/${slug}/full`);
+        const res = await fetch(`${API}/api/node/${slug}/full`);
         if (res.status === 404) {
           if (!cancelled) setError('not_found');
           return;

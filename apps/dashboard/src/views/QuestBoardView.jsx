@@ -75,7 +75,7 @@ export default function QuestBoardView({ projects }) {
       {/* Filter */}
       {uniqueSlugs.length > 1 && (
         <div style={{ marginBottom: 20, display: 'flex', alignItems: 'center', gap: 8 }}>
-          <span style={{ fontSize: 12, color: 'var(--muted)', fontFamily: 'var(--font-mono, monospace)' }}>Projekt</span>
+          <span style={{ fontSize: 12, color: 'var(--muted)', fontFamily: 'var(--font-mono, monospace)' }}>Nod</span>
           <select
             value={filterSlug}
             onChange={(e) => setFilterSlug(e.target.value)}

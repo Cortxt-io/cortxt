@@ -59,7 +59,7 @@ export default function NodePage({ projects = [] }) {
             fontSize: 14,
           }}
         >
-          ← Back to portfolio
+          ← Tillbaka
         </button>
       </div>
     );
@@ -81,7 +81,7 @@ export default function NodePage({ projects = [] }) {
             fontSize: 14,
           }}
         >
-          ← Back to portfolio
+          ← Tillbaka
         </button>
       </div>
     );
@@ -110,7 +110,7 @@ export default function NodePage({ projects = [] }) {
         onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--text)'; }}
         onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--muted)'; }}
       >
-        ← Portfolio
+        ← Wiki
       </button>
 
       {/* Zone 1: Identity — full width */}

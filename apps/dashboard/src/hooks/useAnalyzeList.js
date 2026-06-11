@@ -17,7 +17,7 @@ export default function useAnalyzeList() {
       try {
         const data = await fetchAnalyzeList();
         if (!cancelled) {
-          setProjects(data.projects ?? []);
+          setProjects(data.nodes ?? []);
           setError(null);
         }
       } catch (err) {
