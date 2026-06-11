@@ -18,7 +18,7 @@ Turborepo-monorepo: dashboarden och landningssidan för CNS/Cortxt. Läs detta f
 `kind` (component/system/framework, emergerar ur `part_of`-struktur), `stage` (idea/building/working/maturing), relationer `part_of`/`feeds`/`depends_on`. Detaljer i Project-CNS/CLAUDE.md.
 
 ## Packages
-- `packages/cns-schema` (`@cortxt/cns-schema`) — **enda källan på JS-sidan för nodmodellens enum-värden** (`STATUSES`, `KINDS`, `NODE_STAGES`, `MVP_STAGES`, `RISK_CATEGORIES`). `index.js` är **genererad** — kör `node generate.mjs` (eller `pnpm --filter @cortxt/cns-schema generate`); redigera inte för hand. Enkälla är `Project-CNS/schemas/enums.json` (läses även av backendens `validator.py`). `labels.js` importerar/re-exporterar dessa och håller bara presentation (etiketter/färger). (layer/pipeline/family ligger kvar i `labels.js` tills deras drift retts ut.)
+- `packages/cns-schema` (`@cortxt/cns-schema`) — **enda källan på JS-sidan för nodmodellens enum-värden** (`STATUSES`, `KINDS`, `NODE_STAGES`, `MVP_STAGES`, `RISK_CATEGORIES`, `TYPES`, `DOMAINS`). `index.js` är **genererad** — kör `node generate.mjs` (eller `pnpm --filter @cortxt/cns-schema generate`); redigera inte för hand. Enkälla är `Project-CNS/schemas/enums.json` (läses även av backendens `validator.py`). `labels.js` importerar/re-exporterar dessa och håller bara presentation (etiketter/färger). (layer/pipeline/family ligger kvar i `labels.js` tills deras drift retts ut.)
 - `packages/ui` (`@cortxt/ui`) — delade komponenter.
 
 ## Graf

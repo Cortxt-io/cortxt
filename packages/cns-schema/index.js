@@ -7,3 +7,5 @@ export const KINDS = ["component","system","framework"];
 export const NODE_STAGES = ["idea","building","working","maturing"];
 export const MVP_STAGES = ["hypothesis","problem_interviews","solution_test","demand_test","launch"];
 export const RISK_CATEGORIES = ["technical","market","legal","ops","competition","positioning","adoption"];
+export const TYPES = ["frontend","service","mcp-server","pipeline","cli","tool","agent","infra","library","dataset","ai-model"];
+export const DOMAINS = ["cortxt","shopify-venture"];

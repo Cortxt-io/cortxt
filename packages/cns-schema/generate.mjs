@@ -22,6 +22,8 @@ const EXPORTS = [
   ['NODE_STAGES', enums.stages],
   ['MVP_STAGES', enums.mvp_stages],
   ['RISK_CATEGORIES', enums.risk_categories],
+  ['TYPES', enums.types],
+  ['DOMAINS', enums.domains],
 ];
 
 const body = EXPORTS.map(
