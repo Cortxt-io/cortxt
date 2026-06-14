@@ -33,6 +33,8 @@ Turborepo-monorepo: dashboarden och landningssidan för CNS/Cortxt. Läs detta f
 - suggest-quest: `useSuggestQuest` → backend `/api/node/<slug>/suggest-quest`. Knappen ligger under fliken "Nästa".
 
 ## Arbetsregler
+- **Git/GitHub-grund:** branchstandard (trunk-based, `feat/`/`fix/`/`chore/`/`docs/`, squash-merge) + org/branch-protection
+  är låsta i `Project-CNS/decisions/git-github-grund.md`. Följ den.
 - Spec först. Bygg inte om det som funkar. Återanvänd `labels.js`-konstanter och befintliga komponenter.
 
 ## Underhåll av denna fil
