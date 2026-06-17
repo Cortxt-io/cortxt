@@ -1,0 +1,18 @@
+import { Routes, Route } from 'react-router-dom';
+import { Topbar } from './components/Topbar.jsx';
+import Workspace from './pages/Workspace.jsx';
+import Tools from './pages/Tools.jsx';
+
+export default function App() {
+  return (
+    <div className="app-shell">
+      <Topbar />
+      <main className="app-main">
+        <Routes>
+          <Route path="/" element={<Workspace />} />
+          <Route path="/verktyg" element={<Tools />} />
+        </Routes>
+      </main>
+    </div>
+  );
+}

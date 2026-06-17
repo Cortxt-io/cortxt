@@ -24,14 +24,14 @@ jobs:
           cache: 'pnpm'
       - name: Install dependencies
         run: pnpm install
-      - name: Build landing
-        run: pnpm --filter @cortxt/landing build
+      - name: Build web (cortxt.io)
+        run: pnpm --filter @cortxt/web build
       - name: Setup Pages
         uses: actions/configure-pages@v4
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: ./apps/landing/dist
+          path: ./apps/web/dist
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4

@@ -1,0 +1,25 @@
+/* app.cortxt.io — workspace shell. Leans on @cortxt/ui tokens; only layout chrome here. */
+
+.app-shell { min-height: 100vh; display: flex; flex-direction: column; }
+
+/* Topbar */
+.topbar {
+  display: flex; align-items: center; gap: 1.5rem;
+  height: 52px; padding: 0 1.25rem;
+  background: var(--surface); border-bottom: 1px solid var(--border);
+}
+.topbar__logo { font-weight: 800; color: var(--text-bright); letter-spacing: -0.02em; }
+.topbar__logo span { color: var(--accent); }
+.topbar__nav { display: flex; gap: 1rem; }
+.topbar__nav a { color: var(--muted); font-size: 0.9rem; }
+.topbar__nav a.active, .topbar__nav a:hover { color: var(--text-bright); }
+.topbar__spacer { flex: 1; }
+
+.app-main { flex: 1; padding: 2rem 0; }
+
+.page-head { margin-bottom: 1.5rem; }
+.placeholder {
+  border: 1px dashed var(--border); border-radius: var(--radius);
+  padding: 2rem; color: var(--muted); background: var(--surface);
+}
+.tool-meta { font-size: 0.85rem; color: var(--muted); margin-top: 0.4rem; }

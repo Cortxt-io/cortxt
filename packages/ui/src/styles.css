@@ -1,0 +1,90 @@
+/* @cortxt/ui — shared design system.
+ *
+ * One brand family across cortxt.io (web) and app.cortxt.io (app).
+ * Tokens are CSS variables so apps can re-theme without forking components.
+ * Component classes below are Tailwind-independent on purpose — the package
+ * works in any app regardless of its build config.
+ */
+
+/* ── Tokens ─────────────────────────────────────────────── */
+:root {
+  --bg:          #1e1e1e;
+  --surface:     #252526;
+  --surface-2:   #2d2d2d;
+  --border:      #3c3c3c;
+  --text:        #cccccc;
+  --text-bright: #ffffff;
+  --muted:       #858585;
+  --accent:      #007acc;
+  --accent-h:    #1a8fdb;
+  --success:     #4ec9b0;
+
+  --radius:  6px;
+  --space:   1rem;
+  --maxw:    1100px;
+  --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-sans);
+  font-size: 15px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+a { color: var(--accent); text-decoration: none; }
+a:hover { color: var(--accent-h); }
+
+/* ── Layout ─────────────────────────────────────────────── */
+.cx-container { max-width: var(--maxw); margin: 0 auto; padding: 0 1.5rem; }
+.cx-section   { padding: 4rem 0; }
+.cx-section--bordered { border-top: 1px solid var(--border); }
+
+/* ── Typography ─────────────────────────────────────────── */
+.cx-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.75rem; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--accent); margin-bottom: 0.75rem;
+}
+.cx-h1 { font-size: clamp(2rem, 5vw, 3rem); font-weight: 800; letter-spacing: -0.03em; color: var(--text-bright); line-height: 1.1; }
+.cx-h2 { font-size: 1.75rem; font-weight: 800; letter-spacing: -0.02em; color: var(--text-bright); }
+.cx-h3 { font-size: 1.15rem; font-weight: 700; color: var(--text-bright); }
+.cx-lead { font-size: 1.1rem; color: var(--muted); }
+.cx-muted { color: var(--muted); }
+
+/* ── Button ─────────────────────────────────────────────── */
+.cx-btn {
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  font: 600 0.95rem/1 var(--font-sans);
+  padding: 0.7rem 1.2rem; border-radius: var(--radius);
+  border: 1px solid transparent; cursor: pointer; transition: background .15s, border-color .15s;
+}
+.cx-btn--primary   { background: var(--accent); color: #fff; }
+.cx-btn--primary:hover { background: var(--accent-h); }
+.cx-btn--secondary { background: transparent; color: var(--text); border-color: var(--border); }
+.cx-btn--secondary:hover { border-color: var(--muted); color: var(--text-bright); }
+
+/* ── Card ───────────────────────────────────────────────── */
+.cx-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 1.5rem; transition: border-color .15s;
+}
+.cx-card--link:hover { border-color: var(--accent); }
+
+/* ── Input ──────────────────────────────────────────────── */
+.cx-input {
+  width: 100%; background: var(--surface-2); color: var(--text);
+  border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 0.6rem 0.8rem; font: inherit;
+}
+.cx-input:focus { outline: none; border-color: var(--accent); }
+
+/* ── Grid ───────────────────────────────────────────────── */
+.cx-grid { display: grid; gap: 1.25rem; }
+.cx-grid--2 { grid-template-columns: repeat(2, 1fr); }
+.cx-grid--3 { grid-template-columns: repeat(3, 1fr); }
+@media (max-width: 768px) { .cx-grid--2, .cx-grid--3 { grid-template-columns: 1fr; } }
