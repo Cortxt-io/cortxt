@@ -2,19 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ── Design tokens ─────────────────────────────────────── */
-:root {
-  --bg:         #1e1e1e;
-  --surface:    #252526;
-  --surface-2:  #2d2d2d;
-  --border:     #3c3c3c;
-  --text:       #cccccc;
-  --text-bright:#ffffff;
-  --muted:      #858585;
-  --accent:     #007acc;
-  --accent-h:   #1a8fdb;
-  --success:    #4ec9b0;
-}
+/* Design tokens (incl. light/dark) live in @cortxt/ui/styles.css — single source. */
 
 /* ── Base ───────────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }

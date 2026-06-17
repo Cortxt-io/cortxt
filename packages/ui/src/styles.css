@@ -7,6 +7,9 @@
  */
 
 /* ── Tokens ─────────────────────────────────────────────── */
+/* Dark is the default brand. Light is applied via [data-theme="light"] on <html>
+ * by useTheme() (resolves localStorage → system preference → dark). Components
+ * read only the variables, so theming never forks a component. */
 :root {
   --bg:          #1e1e1e;
   --surface:     #252526;
@@ -18,12 +21,27 @@
   --accent:      #007acc;
   --accent-h:    #1a8fdb;
   --success:     #4ec9b0;
+  color-scheme:  dark;
 
   --radius:  6px;
   --space:   1rem;
   --maxw:    1100px;
   --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+}
+
+:root[data-theme="light"] {
+  --bg:          #ffffff;
+  --surface:     #f7f7f8;
+  --surface-2:   #ededf0;
+  --border:      #e2e2e6;
+  --text:        #33373d;
+  --text-bright: #111418;
+  --muted:       #6b7280;
+  --accent:      #0a6cc0;
+  --accent-h:    #085699;
+  --success:     #0a7f6b;
+  color-scheme:  light;
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -35,6 +53,7 @@ body {
   font-size: 15px;
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
+  transition: background-color .2s ease, color .2s ease;
 }
 a { color: var(--accent); text-decoration: none; }
 a:hover { color: var(--accent-h); }
@@ -67,6 +86,15 @@ a:hover { color: var(--accent-h); }
 .cx-btn--primary:hover { background: var(--accent-h); }
 .cx-btn--secondary { background: transparent; color: var(--text); border-color: var(--border); }
 .cx-btn--secondary:hover { border-color: var(--muted); color: var(--text-bright); }
+
+/* ── Icon button (e.g. theme toggle) ────────────────────── */
+.cx-icon-btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 36px; height: 36px; border-radius: var(--radius);
+  background: transparent; color: var(--text); border: 1px solid var(--border);
+  cursor: pointer; font-size: 1rem; line-height: 1; transition: background .15s, border-color .15s;
+}
+.cx-icon-btn:hover { border-color: var(--muted); color: var(--text-bright); background: var(--surface-2); }
 
 /* ── Card ───────────────────────────────────────────────── */
 .cx-card {
