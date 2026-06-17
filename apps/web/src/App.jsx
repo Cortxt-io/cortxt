@@ -1,27 +1,24 @@
-import Nav from './components/course/Nav';
-import Hero from './components/course/Hero';
-import Problem from './components/course/Problem';
-import Curriculum from './components/course/Curriculum';
-import Method from './components/course/Method';
-import Audience from './components/course/Audience';
-import Pricing from './components/course/Pricing';
-import Faq from './components/course/Faq';
-import Footer from './components/course/Footer';
+import { Routes, Route } from 'react-router-dom';
+import BrandNav from './components/BrandNav.jsx';
+import BrandFooter from './components/BrandFooter.jsx';
+import Home from './pages/Home.jsx';
+import Academy from './pages/Academy.jsx';
+import CourseDetail from './pages/CourseDetail.jsx';
+import Method from './pages/Method.jsx';
 
 export default function App() {
   return (
-    <div className="min-h-screen bg-bg text-text">
-      <Nav />
+    <>
+      <BrandNav />
       <main>
-        <Hero />
-        <Problem />
-        <Curriculum />
-        <Method />
-        <Audience />
-        <Pricing />
-        <Faq />
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/academy" element={<Academy />} />
+          <Route path="/academy/:slug" element={<CourseDetail />} />
+          <Route path="/metod" element={<Method />} />
+        </Routes>
       </main>
-      <Footer />
-    </div>
+      <BrandFooter />
+    </>
   );
 }
