@@ -6,3 +6,4 @@ export { Container, Section } from './Layout.jsx';
 export { Eyebrow, H1, H2, H3, Lead } from './Typography.jsx';
 export { Input } from './Input.jsx';
 export { Grid } from './Grid.jsx';
+export { useTheme, ThemeToggle } from './theme.jsx';

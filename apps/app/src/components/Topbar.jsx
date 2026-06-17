@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom';
-import { Button } from '@cortxt/ui';
+import { Button, ThemeToggle } from '@cortxt/ui';
 import { useAuth } from '../lib/auth.js';
 
 const WEB_URL = import.meta.env.VITE_WEB_URL ?? 'https://cortxt.io';
@@ -15,10 +15,13 @@ export function Topbar() {
         <a href={WEB_URL}>← cortxt.io</a>
       </nav>
       <div className="topbar__spacer" />
-      {/* Auth placeholder — see src/lib/auth.js */}
-      {user
-        ? <Button variant="secondary" onClick={signOut}>Logga ut</Button>
-        : <Button variant="primary" onClick={signIn}>Logga in</Button>}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+        <ThemeToggle />
+        {/* Auth placeholder — see src/lib/auth.js */}
+        {user
+          ? <Button variant="secondary" onClick={signOut}>Logga ut</Button>
+          : <Button variant="primary" onClick={signIn}>Logga in</Button>}
+      </div>
     </header>
   );
 }
