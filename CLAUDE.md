@@ -1,50 +1,61 @@
 # CLAUDE.md — cortxt
 
-Turborepo-monorepo: dashboarden och landningssidan för CNS/Cortxt. Läs detta först varje session. Arbetsspråk: **svenska**.
+Turborepo-monorepo som bär **cortxt.io** (brand/kurser) och **app.cortxt.io** (inloggad arbetsyta). Läs detta först varje session. Arbetsspråk: **svenska**.
 
 **Backenden och nodmodellen bor i det separata `Project-CNS`-repot** — läs dess CLAUDE.md för datamodellen. Det finns ingen backend i det här repot.
 
-## Appar (v1 — alla tre aktiva)
-- `apps/dashboard` — **CNS-UI:t.** React + Vite + ReactFlow + ELK. Portfölj-graf + nodsidor; läser CNS via Railway-proxy (se Dataflöde). Deployad på Vercel: `app.cortxt.io`.
-- `apps/landing` — **kurs-sälj-sidan.** React + Vite + Tailwind, sektionsbaserad (Nav/Hero/Problem/Curriculum/Method/Pricing/Faq). Ingen backend. Deployad på `cortxt.io` via GitHub Pages (`.github/workflows/deploy-landing.yml`).
-- `apps/academy` — **kursleverans-appen.** React + Vite + Tailwind, läs-app med localStorage-progress (2-veckors-curriculum). Ingen auth/backend ännu (Clerk + Neon planeras vid betalande kunder).
+## Två appar + delat designsystem
+- **`apps/web` (`@cortxt/web`) → cortxt.io.** Brand + kurser + vertikal-översikt. Vite+React+react-router, sidor: `/` (Home), `/academy` (+ `/:slug`), `/metod`. Deployas på Vercel (SPA-rewrite i `apps/web/vercel.json`). En GitHub Pages-workflow (`deploy-landing.yml`) finns kvar som legacy — **Vercel är målet** (se "Deploy").
+- **`apps/app` (`@cortxt/app`) → app.cortxt.io.** Tunn inloggad arbetsyta. Vite+React+react-router, sidor: `/` (Min arbetsyta), `/verktyg`. Auth-placeholder (`src/lib/auth.js`) + CNS-stub (`src/lib/cns.js`). Avsiktligt lätt — bygg inte tunga dashboards här.
+- **`packages/ui` (`@cortxt/ui`) → delat designsystem.** Tailwind-oberoende: tokens (CSS-variabler) + primitiver (Button/Card/Layout/Typography/Input/Grid) i `styles.css`. Konsumeras som **käll-JSX** av båda apparna (`optimizeDeps.exclude` i deras vite.config). Importera en gång: `import '@cortxt/ui/styles.css'`. Samma brand-familj; web har mer berättande ton, app mer arbetsyta-ton — samma palett/spacing.
+- **`apps/_experiments/dashboard`** — den tunga CNS-portfölj-grafen (ReactFlow+ELK), **parkerad** utanför `apps/*`-workspace-globben. Inte v1; länkas in som ett verktyg i app:en senare. Rivs inte.
 
-**Konvention för framtida experiment:** appar som inte hör till v1 flyttas till `apps/_experiments/<namn>/` (utanför turbo-default-loopen) snarare än att raderas. Inga appar ligger där nu — alla tre ovan är aktiva.
+**Konvention:** appar som inte hör till v1 flyttas till `apps/_experiments/<namn>/` (utanför turbo-loopen) snarare än raderas.
 
-## Dataflöde (viktigt)
-- Dashboarden hämtar `/api/nodes` (`useProjects.js`). `VITE_API_BASE` är **tom** → relativ path.
-- `apps/dashboard/vercel.json` rewrite:ar `/api/*` → Railway-backenden (`project-cns-production.up.railway.app`). **All node-data och alla mutationer går dit.**
+> ⚠️ **Vercel-omkoppling krävs:** app.cortxt.io:s Vercel-projekt byggde tidigare `apps/dashboard`. Efter flytten måste projektets *Root Directory* peka om till `apps/app`. cortxt.io = nytt Vercel-projekt mot `apps/web` (eller behåll GH Pages tills omkopplat).
+
+## Dataflöde (gäller parkerade dashboarden)
+- Dashboarden (nu i `apps/_experiments/dashboard`) hämtar `/api/nodes` (`useProjects.js`). `VITE_API_BASE` är **tom** → relativ path.
+- `apps/_experiments/dashboard/vercel.json` rewrite:ar `/api/*` → Railway-backenden (`project-cns-production.up.railway.app`). **All node-data och alla mutationer går dit.**
 - Admin-endpoints (analyze, suggest-quest, redigering) kräver auth; token via `VITE_API_TOKEN` (sätts i Vercels env, inte i .env-filen). Saknas den → 401 på admin-anrop.
 - DNS: `app.cortxt.io` = Vercel via en CNAME i Cloudflare. Faller subdomänen bort (NXDOMAIN) men `cortxt.io` lever → kolla Cloudflare DNS + Vercel → Domains; det är posten, inte koden.
 
 ## Koppling till CNS Core (minsta nivå)
 cortxt har **ingen egen backend** — det är en projektion av CNS. Kontraktet är medvetet smalt:
 - **Idag:** CNS exponerar `GET /api/nodes` (Railway; kör `export_json()` mot deploy-tidens katalog). Dashboarden konsumerar det via `useProjects.js`; proxas av `apps/dashboard/vercel.json`. Minimikrav: *exponerar CNS `/api/nodes`, kan dashboarden rita grafen.*
-- **Framåt (planerat, ej byggt):** CNS Core har CLI-kommandot `cns export <slug>` (Markdown/JSON decision-brief). Om backenden senare exponerar det per slug (t.ex. `GET /api/node/<slug>/export`) kan en cortxt-yta (academy/landing) visa ett färdigt beslutsunderlag/kursavsnitt utan egen logik. Bygg inte detta i förväg — dokumenterat som seam, inte feature.
+- **Framåt (planerat, ej byggt):** CNS Core har CLI-kommandot `cns export <slug>` (Markdown/JSON decision-brief). Seamet i `apps/app` är **`src/lib/cns.js` → `fetchDecisionModel(slug)`** (returnerar dummy-data idag; byt mot `fetch(\`${VITE_CNS_API_BASE}/api/export?slug=...\`)` när backenden exponerar det). UI-komponenter anropar alltid den funktionen, aldrig `fetch` direkt.
+- **Auth-seam:** `apps/app/src/lib/auth.js` (`useAuth()`) är platshållaren. Clerk/Supabase/Auth0 wire:as i `main.jsx` + ersätter hooken; gate:a routes i `App.jsx` på `user`.
 
 ## Nodmodellen (sammanfattning)
 `kind` (component/system/framework, emergerar ur `part_of`-struktur), `stage` (idea/building/working/maturing), relationer `part_of`/`feeds`/`depends_on`. Detaljer i Project-CNS/CLAUDE.md.
 
 ## Packages
-- `packages/cns-schema` (`@cortxt/cns-schema`) — **enda källan på JS-sidan för nodmodellens enum-värden** (`STATUSES`, `KINDS`, `NODE_STAGES`, `MVP_STAGES`, `RISK_CATEGORIES`, `TYPES`, `DOMAINS`). `index.js` är **genererad** — kör `node generate.mjs` (eller `pnpm --filter @cortxt/cns-schema generate`); redigera inte för hand. Enkälla är `Project-CNS/schemas/enums.json` (läses även av backendens `validator.py`). Importeras bara av `apps/dashboard`. `labels.js` importerar/re-exporterar dessa och håller bara presentation (etiketter/färger). (layer/pipeline/family ligger kvar i `labels.js` tills deras drift retts ut.)
+- `packages/ui` (`@cortxt/ui`) — delat designsystem (se ovan). Tailwind-oberoende; käll-JSX.
+- `packages/cns-schema` (`@cortxt/cns-schema`) — JS-enkälla för nodmodellens enum-värden, **genererad** ur `Project-CNS/schemas/enums.json` (`node generate.mjs`). Används idag bara av den parkerade dashboarden. Regenerera när enums ändras (t.ex. nya `ENTITY_TYPES`).
 
-(`packages/ui` / `@cortxt/ui` är **borttaget** — var ett tomt paket, finns varken på disk eller som beroende.)
+## Kör lokalt
+```bash
+pnpm install
+pnpm --filter @cortxt/web dev    # cortxt.io  → http://localhost:5173
+pnpm --filter @cortxt/app dev    # app.cortxt.io → http://localhost:5174
+pnpm build                       # turbo bygger alla aktiva appar + paket
+```
+Mönster: brand-sidor i `apps/web/src/pages`, app-ytor i `apps/app/src/pages`; **all delad UI ligger i `@cortxt/ui`** — lägg primitiver där, inte per app. CNS-anrop → `apps/app/src/lib/cns.js`; auth → `apps/app/src/lib/auth.js`.
 
-## Graf
-- `ContainerGraphCanvas.jsx` — container-vyn (system som behållare, komponenter inuti via ReactFlow `parentNode` + ELK `INCLUDE_CHILDREN`). Aktiveras av `USE_CONTAINER_GRAPH = true` i `GraphCanvas.jsx`.
-- `SystemContainerNode.jsx` / `ComponentNode.jsx` — nodtyper. `GraphLegend.jsx` — legend.
-- **Klassificera container på STRUKTUR** (någon nod har `part_of === slug`), inte på `kind`-fältet.
-- **Dra färger/etiketter från `src/data/labels.js`** (`KIND_HEX_COLORS`, `NODE_STAGE_COLORS`, `getKindHexColor`, `getNodeStageColor`) — hårdkoda inte hex i komponenter, då driver legend och nod isär.
-- Zoom (semantisk) + fokusläge är byggda. **Nästa arbete:** läsbar layout (roll-lanes substrat→flöde→yta, konsekvent flödesriktning, idé-/oplacerade noder på egen hylla). Den nya positioneringen får inte bryta zoom/fokus.
+## Framtida affärsben (lås inte intäktsmodellen)
+Arkitekturen ska hålla flera intäktsströmmar öppna samtidigt:
+- **Kurser (B2C/B2B)** — `apps/web` academy; CTA "anmäl intresse" idag, Stripe-checkout pluggas på samma `CourseDetail`-struktur senare.
+- **Licensierade verktyg (SaaS)** — `apps/app` + vertikaler (juvahem/orgkomp) bakom auth.
+- **Rapporter** — CNS-export per case (`cns export <slug>`) paketerad som beslutsunderlag.
+- **Konsult/partnerskap** — "Arbeta med oss" på Home.
+Bygg smala slices, men håll copy och struktur breda nog för alla fyra.
 
-## Nodsida
-- `NodePage.jsx` + `NodePage/` (IdentityZone, TimelineZone, ContextZone, DocsZone). Zon→sektion-mappning per kind i `src/data/zoneSections.js` (`ZONE_SECTION_MAP`).
-- suggest-quest: `useSuggestQuest` → backend `/api/node/<slug>/suggest-quest`. Knappen ligger under fliken "Nästa".
+## Parkerad dashboard (`apps/_experiments/dashboard`)
+Den tunga CNS-grafen (ReactFlow+ELK, NodePage, `useProjects`/Railway-proxy, `labels.js`-färger) lever här tills den länkas in som ett verktyg i `apps/app`. Rör den inte i v1-arbete.
 
 ## Arbetsregler
-- **Git/GitHub-grund:** branchstandard (trunk-based, `feat/`/`fix/`/`chore/`/`docs/`, squash-merge) + org/branch-protection
-  är låsta i `Project-CNS/decisions/git-github-grund.md`. Följ den.
-- Spec först. Bygg inte om det som funkar. Återanvänd `labels.js`-konstanter och befintliga komponenter.
+- **Git/GitHub-grund:** branchstandard (trunk-based, `feat/`/`fix/`/`chore/`/`docs/`, squash-merge) + org/branch-protection är låsta i `Project-CNS/decisions/git-github-grund.md`. Följ den.
+- Spec först. Bygg inte om det som funkar. **Återanvänd `@cortxt/ui`-primitiver** — hårdkoda inte färger/komponenter per app. Håll app:en tunn (inga tunga dashboards/control centers).
 
 ## Underhåll av denna fil
 Läses in varje session. **Uppdatera den i samma ändring** som du ändrar arkitektur, dataflöde, graf-/nodside-struktur eller konventioner. Koncis och högsignalerad — det du behöver för att inte göra fel, inte fullständig dokumentation.
