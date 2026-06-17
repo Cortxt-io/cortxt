@@ -1,19 +1,27 @@
-import Nav from './components/Nav';
-import Hero from './components/Hero';
-import CNS from './components/CNS';
-import Pipeline from './components/Pipeline';
-import Stack from './components/Stack';
-import Footer from './components/Footer';
+import Nav from './components/course/Nav';
+import Hero from './components/course/Hero';
+import Problem from './components/course/Problem';
+import Curriculum from './components/course/Curriculum';
+import Method from './components/course/Method';
+import Audience from './components/course/Audience';
+import Pricing from './components/course/Pricing';
+import Faq from './components/course/Faq';
+import Footer from './components/course/Footer';
 
 export default function App() {
   return (
-    <>
+    <div className="min-h-screen bg-bg text-text">
       <Nav />
-      <Hero />
-      <CNS />
-      <Pipeline />
-      <Stack />
+      <main>
+        <Hero />
+        <Problem />
+        <Curriculum />
+        <Method />
+        <Audience />
+        <Pricing />
+        <Faq />
+      </main>
       <Footer />
-    </>
+    </div>
   );
 }
