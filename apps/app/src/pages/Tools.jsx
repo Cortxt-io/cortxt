@@ -1,30 +1,29 @@
-import { Container, Section, Eyebrow, H1, Lead, Grid, Card, H3, Button } from '@cortxt/ui';
+import { Container, Section, Eyebrow, H1, Lead } from '@cortxt/ui';
+import { useModels } from '../lib/useModels.js';
+import { ReadoutList } from '../components/ReadoutList.jsx';
 
-/* Vertical tools. External ones link out today; future in-app tools route internally. */
-const TOOLS = [
-  { name: 'Juvahem', desc: 'Jobb & boende-beslut för par som ska flytta — rankar 290 kommuner.', href: 'https://juvahem.se', live: true },
-  { name: 'Orgkomp', desc: 'Organisationsdesign & kompetenskartläggning — redigerbar org-graf.', href: 'https://orgkomp.com', live: true },
-  { name: 'BK Finans', desc: 'Enkla finansierings- och likviditetsbeslut.', href: '#', live: false },
-  { name: 'Liaguiden', desc: 'LIA-/praktik- och karriärbeslut.', href: '#', live: false },
-];
-
+/* Verktyg = the launcher. Products with a live URL, as readout rows that link OUT.
+ * Parked ventures live in the cockpit, not here. */
 export default function Tools() {
+  const { models, loading, error } = useModels({ productsOnly: true });
+  const launchable = models.filter((m) => m.urlLive);
+
   return (
     <Section>
       <Container>
         <div className="page-head">
           <Eyebrow>Verktyg</Eyebrow>
           <H1>Verktyg</H1>
-          <Lead>Vertikala verktyg byggda på samma motor (CNS Core).</Lead>
+          <Lead>Vertikala verktyg byggda på samma motor — öppna dem direkt.</Lead>
         </div>
-        <Grid cols={2}>
-          {TOOLS.map((t) => (
-            <Card key={t.name} as="a" link href={t.href} target={t.href.startsWith('http') ? '_blank' : undefined} rel="noreferrer">
-              <H3>{t.name}{!t.live && <span className="tool-meta"> · snart</span>}</H3>
-              <p className="tool-meta">{t.desc}</p>
-            </Card>
-          ))}
-        </Grid>
+
+        <ReadoutList
+          models={launchable}
+          loading={loading}
+          error={error}
+          hrefFor={(m) => m.urlLive}
+          emptyText="Inga live-verktyg ännu — fyll url_live för en venture i catalog.yaml."
+        />
       </Container>
     </Section>
   );

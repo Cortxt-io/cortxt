@@ -11,23 +11,31 @@
  * by useTheme() (resolves localStorage → system preference → dark). Components
  * read only the variables, so theming never forks a component. */
 :root {
-  --bg:          #1e1e1e;
-  --surface:     #252526;
-  --surface-2:   #2d2d2d;
-  --border:      #3c3c3c;
-  --text:        #cccccc;
-  --text-bright: #ffffff;
-  --muted:       #858585;
-  --accent:      #007acc;
-  --accent-h:    #1a8fdb;
-  --success:     #4ec9b0;
+  --bg:          #15171c;
+  --surface:     #1c1f26;
+  --surface-2:   #23262e;
+  --border:      #2b2f38;
+  --text:        #c9cdd6;
+  --text-bright: #f4f6fa;
+  --muted:       #767d8a;
+  --accent:      #4ec9b0;
+  --accent-h:    #6fd8c3;
+  --success:     #46b96a;
   color-scheme:  dark;
+
+  /* Health telemetry — the page's one colour language (derived, never declared).
+   * Always pair with a text label; never colour alone (a11y). */
+  --health-healthy:   #46b96a;
+  --health-attention: #d8a223;
+  --health-degraded:  #f0524a;
+  --health-unknown:   #5a606b;
 
   --radius:  6px;
   --space:   1rem;
   --maxw:    1100px;
-  --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+  --font-sans:    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono:    'JetBrains Mono', ui-monospace, monospace;
+  --font-display: 'Space Grotesk', var(--font-sans);
 }
 
 :root[data-theme="light"] {
@@ -38,10 +46,15 @@
   --text:        #33373d;
   --text-bright: #111418;
   --muted:       #6b7280;
-  --accent:      #0a6cc0;
-  --accent-h:    #085699;
-  --success:     #0a7f6b;
+  --accent:      #0e9d86;
+  --accent-h:    #0b8473;
+  --success:     #1a7f3d;
   color-scheme:  light;
+
+  --health-healthy:   #1a7f3d;
+  --health-attention: #9a6a06;
+  --health-degraded:  #c0392b;
+  --health-unknown:   #6b7280;
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -69,9 +82,17 @@ a:hover { color: var(--accent-h); }
   font-size: 0.75rem; letter-spacing: 0.1em; text-transform: uppercase;
   color: var(--accent); margin-bottom: 0.75rem;
 }
-.cx-h1 { font-size: clamp(2rem, 5vw, 3rem); font-weight: 800; letter-spacing: -0.03em; color: var(--text-bright); line-height: 1.1; }
-.cx-h2 { font-size: 1.75rem; font-weight: 800; letter-spacing: -0.02em; color: var(--text-bright); }
-.cx-h3 { font-size: 1.15rem; font-weight: 700; color: var(--text-bright); }
+/* Instrument label — the structural mono voice (section heads, data labels). */
+.cx-label {
+  font-family: var(--font-mono);
+  font-size: 0.7rem; letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--muted);
+}
+/* Display headings use Space Grotesk; Grotesk reads heavier than the system stack,
+ * so weights step down from the old 800. */
+.cx-h1 { font-family: var(--font-display); font-size: clamp(2rem, 5vw, 3rem); font-weight: 600; letter-spacing: -0.025em; color: var(--text-bright); line-height: 1.1; }
+.cx-h2 { font-family: var(--font-display); font-size: 1.75rem; font-weight: 600; letter-spacing: -0.02em; color: var(--text-bright); }
+.cx-h3 { font-family: var(--font-display); font-size: 1.15rem; font-weight: 500; color: var(--text-bright); }
 .cx-lead { font-size: 1.1rem; color: var(--muted); }
 .cx-muted { color: var(--muted); }
 

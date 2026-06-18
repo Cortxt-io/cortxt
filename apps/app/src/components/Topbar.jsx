@@ -10,7 +10,8 @@ export function Topbar() {
     <header className="topbar">
       <div className="topbar__logo">cortxt<span>.</span></div>
       <nav className="topbar__nav">
-        <NavLink to="/" end>Min arbetsyta</NavLink>
+        <NavLink to="/" end>Översikt</NavLink>
+        <NavLink to="/portfolj">Portfölj</NavLink>
         <NavLink to="/verktyg">Verktyg</NavLink>
         <a href={WEB_URL}>← cortxt.io</a>
       </nav>
