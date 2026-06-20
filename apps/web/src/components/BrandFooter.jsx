@@ -1,26 +1,30 @@
 import { Link } from 'react-router-dom';
+import { Separator } from '@/components/ui/separator';
 
 export default function BrandFooter() {
   return (
-    <footer style={{ borderTop: '1px solid var(--border)', padding: '2.5rem 0', marginTop: '2rem' }}>
-      <div className="cx-container" style={{ display: 'flex', gap: '2rem', flexWrap: 'wrap', justifyContent: 'space-between' }}>
+    <footer className="mt-8 pt-10">
+      <Separator />
+      <div className="mx-auto flex max-w-[1100px] flex-wrap justify-between gap-8 px-6 py-10">
         <div>
-          <div style={{ fontWeight: 800, color: 'var(--text-bright)' }}>cortxt<span style={{ color: 'var(--accent)' }}>.</span></div>
-          <p className="cx-muted" style={{ fontSize: '0.85rem', maxWidth: 320, marginTop: '0.5rem' }}>
+          <div className="font-display font-bold text-text-bright">
+            cortxt<span className="text-primary">.</span>
+          </div>
+          <p className="cx-muted mt-2 max-w-[320px] text-sm">
             Plattform för beslut & lärande med AI och strukturerade modeller.
           </p>
         </div>
-        <div style={{ display: 'flex', gap: '3rem', fontSize: '0.9rem' }}>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
-            <strong style={{ color: 'var(--text-bright)' }}>Cortxt</strong>
-            <Link to="/academy">Kurser</Link>
-            <Link to="/metod">Metod</Link>
-            <a href="https://app.cortxt.io">App</a>
+        <div className="flex gap-12 text-sm">
+          <div className="flex flex-col gap-1.5">
+            <strong className="text-text-bright">Cortxt</strong>
+            <Link to="/academy" className="text-muted-foreground hover:text-foreground">Kurser</Link>
+            <Link to="/metod" className="text-muted-foreground hover:text-foreground">Metod</Link>
+            <a href="https://app.cortxt.io" className="text-muted-foreground hover:text-foreground">App</a>
           </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
-            <strong style={{ color: 'var(--text-bright)' }}>Vertikaler</strong>
-            <a href="https://juvahem.se">Juvahem</a>
-            <a href="https://orgkomp.com">Orgkomp</a>
+          <div className="flex flex-col gap-1.5">
+            <strong className="text-text-bright">Vertikaler</strong>
+            <a href="https://juvahem.se" className="text-muted-foreground hover:text-foreground">Juvahem</a>
+            <a href="https://orgkomp.com" className="text-muted-foreground hover:text-foreground">Orgkomp</a>
           </div>
         </div>
       </div>
