@@ -1,6 +1,7 @@
 import { Container, Section, Eyebrow, H1, Lead } from '@cortxt/ui';
 import { useModels } from '../lib/useModels.js';
 import { ReadoutList } from '../components/ReadoutList.jsx';
+import { PlannedFeature } from '../components/PlannedFeature.jsx';
 
 /* Verktyg = the launcher. Products with a live URL, as readout rows that link OUT.
  * Parked ventures live in the cockpit, not here. */
@@ -24,6 +25,14 @@ export default function Tools() {
           hrefFor={(m) => m.urlLive}
           emptyText="Inga live-verktyg ännu — fyll url_live för en venture i catalog.yaml."
         />
+
+        {/* Roadmap signpost — the parked CNS portfolio graph lands here as a tool. */}
+        <div className="section-gap">
+          <PlannedFeature
+            label="Portföljgraf"
+            hint="Interaktiv karta över systemen och deras beroenden — den parkerade CNS-grafen, inkopplad som ett verktyg här."
+          />
+        </div>
       </Container>
     </Section>
   );

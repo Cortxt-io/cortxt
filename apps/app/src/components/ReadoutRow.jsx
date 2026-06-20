@@ -3,6 +3,7 @@
  * Links internally to the decision-model view, or outward via `href` (launcher use). */
 import { Link } from 'react-router-dom';
 import { StatusTag } from './StatusTag.jsx';
+import { Badge } from './ui/badge.jsx';
 
 const HEALTH_LABEL = { healthy: 'Frisk', attention: 'Bevaka', degraded: 'Försämrad', unknown: 'Okänd' };
 
@@ -15,7 +16,7 @@ export function ReadoutRow({ model, href }) {
       <span className="readout-row__main">
         <span className="readout-row__title">
           <span className="readout-row__name">{model.title}</span>
-          {model.domain && <span className="readout-row__domain">{model.domain}</span>}
+          {model.domain && <Badge variant="outline">{model.domain}</Badge>}
         </span>
         {model.summary && <span className="readout-row__summary">{model.summary}</span>}
       </span>

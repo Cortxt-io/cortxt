@@ -3,15 +3,13 @@ import tailwindcssAnimate from 'tailwindcss-animate';
 /** @type {import('tailwindcss').Config} */
 export default {
   // Theme flips via [data-theme] on <html> at the CSS-variable level (useTheme),
-  // so shadcn colours below are theme-agnostic. `dark:` utilities, if ever used,
-  // resolve against the explicit dark attribute.
+  // so shadcn colours below are theme-agnostic — same contract as apps/web.
   darkMode: ['selector', '[data-theme="dark"]'],
   content: ['./index.html', './src/**/*.{js,jsx}'],
   theme: {
     container: { center: true, padding: '1.5rem', screens: { '2xl': '1100px' } },
     extend: {
       colors: {
-        // shadcn semantic tokens → existing cortxt CSS variables (single source).
         border: 'var(--border)',
         input: 'var(--border)',
         ring: 'var(--accent)',
@@ -24,11 +22,15 @@ export default {
         accent: { DEFAULT: 'var(--surface-2)', foreground: 'var(--text-bright)' },
         card: { DEFAULT: 'var(--surface)', foreground: 'var(--text-bright)' },
         popover: { DEFAULT: 'var(--surface)', foreground: 'var(--text-bright)' },
-        // Raw brand tokens kept for occasional direct use (non-colliding names).
         brand: 'var(--accent)',
         'brand-hover': 'var(--accent-h)',
         'text-bright': 'var(--text-bright)',
         success: 'var(--success)',
+        // Health telemetry — the cockpit's one colour language.
+        'health-healthy': 'var(--health-healthy)',
+        'health-attention': 'var(--health-attention)',
+        'health-degraded': 'var(--health-degraded)',
+        'health-unknown': 'var(--health-unknown)',
       },
       borderRadius: {
         lg: 'var(--radius)',

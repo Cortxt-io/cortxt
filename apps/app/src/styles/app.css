@@ -1,4 +1,10 @@
-/* app.cortxt.io — workspace shell. Leans on @cortxt/ui tokens; only layout chrome here. */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* app.cortxt.io — workspace shell. Leans on @cortxt/ui tokens; only layout chrome here.
+ * shadcn primitives compose on top via the token map in tailwind.config.js; the
+ * cockpit identity (pulse / readout rows / health colour language) stays here. */
 
 .app-shell { min-height: 100vh; display: flex; flex-direction: column; }
 
@@ -88,8 +94,11 @@
   display: flex; align-items: baseline; gap: 0.6rem; margin-bottom: 0.4rem;
 }
 .portfolio-group__count { font-family: var(--font-mono); font-size: 0.75rem; color: var(--muted); }
+.portfolio-subgroup { margin-top: 1rem; }
+.portfolio-subgroup > .cx-eyebrow { display: block; margin-bottom: 0.3rem; }
 
 /* Decision-model view */
 .decision-meta { display: flex; align-items: center; gap: 0.75rem; margin-top: 0.6rem; }
 .decision-section { margin-top: 1.5rem; }
+.decision-issues { list-style: disc; padding-left: 1.2rem; } /* restored: Tailwind preflight resets list markers */
 .decision-issues li { margin: 0.25rem 0; }

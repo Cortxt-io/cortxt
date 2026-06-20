@@ -1,5 +1,6 @@
 import { NavLink } from 'react-router-dom';
-import { Button, ThemeToggle } from '@cortxt/ui';
+import { ThemeToggle } from '@cortxt/ui';
+import { Button } from '@/components/ui/button';
 import { useAuth } from '../lib/auth.js';
 
 const WEB_URL = import.meta.env.VITE_WEB_URL ?? 'https://cortxt.io';
@@ -20,8 +21,8 @@ export function Topbar() {
         <ThemeToggle />
         {/* Auth placeholder — see src/lib/auth.js */}
         {user
-          ? <Button variant="secondary" onClick={signOut}>Logga ut</Button>
-          : <Button variant="primary" onClick={signIn}>Logga in</Button>}
+          ? <Button variant="secondary" size="sm" onClick={signOut}>Logga ut</Button>
+          : <Button size="sm" onClick={signIn}>Logga in</Button>}
       </div>
     </header>
   );

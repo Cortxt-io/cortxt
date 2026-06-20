@@ -1,5 +1,8 @@
 import { Link } from 'react-router-dom';
-import { Container, Section, Eyebrow, H1, H2, H3, Lead, Grid, Card, Button } from '@cortxt/ui';
+import { Container, Section } from '@/components/layout';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { PlannedFeature } from '@/components/PlannedFeature';
 import { VERTICALS } from '../data/verticals.js';
 
 const WHAT_WE_DO = [
@@ -14,15 +17,19 @@ export default function Home() {
       {/* Hero */}
       <Section>
         <Container>
-          <Eyebrow>Beslut & lärande med AI</Eyebrow>
-          <H1>Strukturerade modeller<br />för bättre beslut.</H1>
-          <Lead style={{ maxWidth: 620, marginTop: '1rem' }}>
+          <div className="cx-eyebrow">Beslut & lärande med AI</div>
+          <h1 className="cx-h1">Strukturerade modeller<br />för bättre beslut.</h1>
+          <p className="cx-lead mt-4 max-w-[620px]">
             Cortxt är plattformen där du modellerar beslut, lär dig metoden och bygger
             verktyg — för dig, ditt team eller dina kunder.
-          </Lead>
-          <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1.75rem' }}>
-            <Button href="/academy">Utforska kurser</Button>
-            <Button variant="secondary" href="/metod">Lär dig metoden</Button>
+          </p>
+          <div className="mt-7 flex flex-wrap gap-3">
+            <Button asChild>
+              <Link to="/academy">Utforska kurser</Link>
+            </Button>
+            <Button asChild variant="secondary">
+              <Link to="/metod">Lär dig metoden</Link>
+            </Button>
           </div>
         </Container>
       </Section>
@@ -30,55 +37,85 @@ export default function Home() {
       {/* Vad vi gör */}
       <Section bordered>
         <Container>
-          <Eyebrow>Vad vi gör</Eyebrow>
-          <H2>Tre delar, en motor</H2>
-          <Grid cols={3} style={{ marginTop: '1.75rem' }}>
+          <div className="cx-eyebrow">Vad vi gör</div>
+          <h2 className="cx-h2">Tre delar, en motor</h2>
+          <div className="mt-7 grid gap-5 md:grid-cols-3">
             {WHAT_WE_DO.map((w) => (
-              <Card key={w.title}><H3>{w.title}</H3><p className="cx-muted" style={{ marginTop: '0.5rem' }}>{w.body}</p></Card>
+              <Card key={w.title}>
+                <CardContent className="p-6">
+                  <h3 className="cx-h3">{w.title}</h3>
+                  <p className="cx-muted mt-2">{w.body}</p>
+                </CardContent>
+              </Card>
             ))}
-          </Grid>
+          </div>
         </Container>
       </Section>
 
       {/* Vertikaler */}
       <Section bordered>
         <Container>
-          <Eyebrow>Vertikaler</Eyebrow>
-          <H2>Samma motor, olika beslut</H2>
-          <Lead style={{ marginTop: '0.5rem' }}>Fokuserade verktyg byggda på CNS Core.</Lead>
-          <Grid cols={2} style={{ marginTop: '1.75rem' }}>
-            {VERTICALS.map((v) => (
-              <Card key={v.name} as="a" link href={v.href} target={v.href.startsWith('http') ? '_blank' : undefined} rel="noreferrer">
-                <H3>{v.name} {!v.live && <span className="cx-muted" style={{ fontSize: '0.8rem' }}>· snart</span>}</H3>
-                <div className="cx-eyebrow" style={{ marginTop: '0.4rem' }}>{v.tagline}</div>
-                <p className="cx-muted" style={{ marginTop: '0.4rem' }}>{v.desc}</p>
-              </Card>
-            ))}
-          </Grid>
+          <div className="cx-eyebrow">Vertikaler</div>
+          <h2 className="cx-h2">Samma motor, olika beslut</h2>
+          <p className="cx-lead mt-2">Fokuserade verktyg byggda på CNS Core.</p>
+          {/* Lit instruments (live verticals) you can use; unlit ones are planned. */}
+          <div className="mt-7 grid gap-5 md:grid-cols-2">
+            {VERTICALS.map((v) => {
+              if (!v.live) {
+                return (
+                  <PlannedFeature
+                    key={v.name}
+                    label={`${v.name} · ${v.tagline}`}
+                    hint={v.desc}
+                  />
+                );
+              }
+              const external = v.href.startsWith('http');
+              return (
+                <a
+                  key={v.name}
+                  href={v.href}
+                  target={external ? '_blank' : undefined}
+                  rel={external ? 'noreferrer' : undefined}
+                  className="block rounded-lg"
+                >
+                  <Card className="h-full hover:border-primary">
+                    <CardContent className="p-6">
+                      <h3 className="cx-h3">{v.name}</h3>
+                      <div className="cx-eyebrow mt-2">{v.tagline}</div>
+                      <p className="cx-muted mt-2">{v.desc}</p>
+                    </CardContent>
+                  </Card>
+                </a>
+              );
+            })}
+          </div>
         </Container>
       </Section>
 
       {/* Kurser & resurser */}
       <Section bordered>
         <Container>
-          <Eyebrow>Kurser & resurser</Eyebrow>
-          <H2>Lär dig bygga beslut</H2>
-          <Lead style={{ marginTop: '0.5rem', marginBottom: '1.5rem' }}>
+          <div className="cx-eyebrow">Kurser & resurser</div>
+          <h2 className="cx-h2">Lär dig bygga beslut</h2>
+          <p className="cx-lead mb-6 mt-2">
             Generella kurser i modellering och AI, plus vertikal-specifika bygg-kurser.
-          </Lead>
-          <Button href="/academy">Till academy →</Button>
+          </p>
+          <Button asChild>
+            <Link to="/academy">Till academy →</Link>
+          </Button>
         </Container>
       </Section>
 
       {/* Arbeta med oss */}
       <Section bordered>
         <Container>
-          <Eyebrow>Arbeta med oss</Eyebrow>
-          <H2>Samarbete & uppdrag</H2>
-          <Lead style={{ marginTop: '0.5rem' }}>
+          <div className="cx-eyebrow">Arbeta med oss</div>
+          <h2 className="cx-h2">Samarbete & uppdrag</h2>
+          <p className="cx-lead mt-2">
             Vill du bygga en datadriven vertikal eller modellera era beslut? Vi tar utvalda
-            samarbeten. <Link to="/metod">Läs om metoden</Link>.
-          </Lead>
+            samarbeten. <Link to="/metod" className="text-primary hover:underline">Läs om metoden</Link>.
+          </p>
         </Container>
       </Section>
     </>
