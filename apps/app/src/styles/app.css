@@ -23,3 +23,8 @@
   padding: 2rem; color: var(--muted); background: var(--surface);
 }
 .tool-meta { font-size: 0.85rem; color: var(--muted); margin-top: 0.4rem; }
+
+/* Cockpit (woven portfolio view) */
+.cockpit-stat { font-size: 2rem; font-weight: 700; line-height: 1; }
+.cockpit-order { margin-top: 0.6rem; font-size: 0.9rem; }
+.cockpit-refs { margin-top: 0.4rem; font-size: 0.8rem; color: var(--muted); }

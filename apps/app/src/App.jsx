@@ -1,6 +1,7 @@
 import { Routes, Route } from 'react-router-dom';
 import { Topbar } from './components/Topbar.jsx';
 import Workspace from './pages/Workspace.jsx';
+import Cockpit from './pages/Cockpit.jsx';
 import Tools from './pages/Tools.jsx';
 
 export default function App() {
@@ -10,6 +11,7 @@ export default function App() {
       <main className="app-main">
         <Routes>
           <Route path="/" element={<Workspace />} />
+          <Route path="/cockpit" element={<Cockpit />} />
           <Route path="/verktyg" element={<Tools />} />
         </Routes>
       </main>

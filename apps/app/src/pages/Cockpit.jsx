@@ -1,0 +1,113 @@
+import { Container, Section, Eyebrow, H1, Lead, Grid, Card, H3 } from '@cortxt/ui';
+import useCommandCenter from '../hooks/useCommandCenter.js';
+
+/* Cockpit — the woven portfolio view. Renders the composed Command Center state
+ * (missions/sitrep/orders/freshness) that CNS Core builds in one read. This is
+ * the app's first live CNS surface: catalog → composer → /api/command-center → here. */
+
+const READINESS_LABEL = {
+  operational: 'Operativ',
+  watch: 'Bevakas',
+  degraded: 'Försämrad',
+  dark: 'Mörk',
+};
+
+function Sitrep({ sitrep }) {
+  const cells = [
+    { key: 'operational', label: 'Operativa' },
+    { key: 'watch', label: 'Bevakas' },
+    { key: 'degraded', label: 'Försämrade' },
+    { key: 'dark', label: 'Mörka' },
+  ];
+  return (
+    <Grid cols={4}>
+      {cells.map((c) => (
+        <Card key={c.key}>
+          <div className="cockpit-stat">{sitrep?.[c.key] ?? 0}</div>
+          <p className="tool-meta">{c.label}</p>
+        </Card>
+      ))}
+    </Grid>
+  );
+}
+
+function Missions({ missions }) {
+  if (!missions?.length) return <p className="placeholder">Inga aktiva uppdrag.</p>;
+  return (
+    <Grid cols={2}>
+      {missions.map((m) => (
+        <Card key={m.number}>
+          <H3>{m.title}</H3>
+          <p className="tool-meta">
+            {READINESS_LABEL[m.readiness] ?? m.readiness}
+            {' · '}{m.open_objectives} öppna{m.commander ? ' · har ägare' : ''}
+          </p>
+          {m.order && <p className="cockpit-order">{m.order}</p>}
+        </Card>
+      ))}
+    </Grid>
+  );
+}
+
+function Orders({ orders }) {
+  if (!orders?.length) return <p className="placeholder">Inga rekommendationer just nu.</p>;
+  return (
+    <Grid cols={1}>
+      {orders.map((o, i) => (
+        <Card key={o.refs?.join(',') ?? i}>
+          <H3>{o.title ?? o.type}</H3>
+          {o.motivation && <p className="tool-meta">{o.motivation}</p>}
+          {o.refs?.length ? <p className="cockpit-refs">{o.refs.join(' · ')}</p> : null}
+        </Card>
+      ))}
+    </Grid>
+  );
+}
+
+export default function Cockpit() {
+  const { state, loading, error } = useCommandCenter();
+
+  return (
+    <Section>
+      <Container>
+        <div className="page-head">
+          <Eyebrow>Cockpit</Eyebrow>
+          <H1>Portföljöversikt</H1>
+          <Lead>Den sammanvävda lägesbilden — uppdrag, läge och nästa steg, direkt från CNS Core.</Lead>
+        </div>
+
+        {loading && <p className="placeholder">Hämtar lägesbild…</p>}
+        {error && (
+          <p className="placeholder">
+            Kunde inte nå CNS Core: {error}. Kontrollera att backenden är uppe.
+          </p>
+        )}
+
+        {state && !loading && (
+          <>
+            <Sitrep sitrep={state.sitrep} />
+
+            <div className="page-head" style={{ marginTop: '2rem' }}>
+              <Eyebrow>Uppdrag</Eyebrow>
+            </div>
+            <Missions missions={state.missions} />
+
+            <div className="page-head" style={{ marginTop: '2rem' }}>
+              <Eyebrow>Nästa steg</Eyebrow>
+            </div>
+            <Orders orders={state.orders} />
+
+            {state.freshness && (
+              <p className="tool-meta" style={{ marginTop: '1.5rem' }}>
+                {state.freshness.reachable ? 'Källa nåbar' : 'Källa ej nåbar'}
+                {state.freshness.age_s != null
+                  ? ` · ${Math.round(state.freshness.age_s)}s sedan uppdatering`
+                  : ''}
+              </p>
+            )}
+          </>
+        )}
+      </Container>
+    </Section>
+  );
+}
