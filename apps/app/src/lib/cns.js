@@ -11,6 +11,7 @@
  *   GET /api/nodes               → { version, nodes[], agents[], edges[] }
  *   GET /api/node/<slug>/full    → { status, slug, meta, sections, node_files, pending }
  *   GET /api/issues?node=&state= → { issues[] }
+ *   GET /api/command-center      → { missions, sitrep, logistics, orders, command, freshness }
  */
 
 const API_BASE = import.meta.env.VITE_CNS_API_BASE ?? ''; // '' = same-origin proxy
@@ -63,4 +64,11 @@ export async function fetchDecisionModel(slug) {
 export async function fetchModelIssues(slug) {
   const data = await getJSON(`/api/issues?node=${encodeURIComponent(slug)}&state=open`);
   return data.issues ?? [];
+}
+
+/* Composed Command Center state — the woven portfolio view CNS builds in one read
+ * (missions/sitrep/orders/logistics/command/freshness). Wraps GET /api/command-center,
+ * which exposes command_center_state() in Project-CNS. Rendered by the Cockpit page. */
+export async function fetchCommandCenter() {
+  return getJSON('/api/command-center');
 }
