@@ -28,3 +28,23 @@
 .cockpit-stat { font-size: 2rem; font-weight: 700; line-height: 1; }
 .cockpit-order { margin-top: 0.6rem; font-size: 0.9rem; }
 .cockpit-refs { margin-top: 0.4rem; font-size: 0.8rem; color: var(--muted); }
+
+/* Drift/infra-rad — färg paras alltid med text + prick (a11y) */
+.drift {
+  display: flex; align-items: flex-start; gap: 0.6rem;
+  padding: 0.75rem 1rem; margin-bottom: 1.25rem;
+  border: 1px solid var(--border); border-left-width: 4px;
+  border-radius: var(--radius); background: var(--surface);
+  font-size: 0.9rem;
+}
+.drift-dot { flex: 0 0 auto; width: 0.7rem; height: 0.7rem; border-radius: 50%; margin-top: 0.3rem; background: var(--muted); }
+.drift-detail { color: var(--muted); }
+.drift-refs { color: var(--muted); font-family: var(--font-mono, monospace); font-size: 0.8rem; }
+.drift--healthy   { border-left-color: var(--health-healthy); }
+.drift--healthy   .drift-dot { background: var(--health-healthy); }
+.drift--attention { border-left-color: var(--health-attention); }
+.drift--attention .drift-dot { background: var(--health-attention); }
+.drift--degraded  { border-left-color: var(--health-degraded); }
+.drift--degraded  .drift-dot { background: var(--health-degraded); }
+.drift--unknown   { border-left-color: var(--health-unknown); }
+.drift--unknown   .drift-dot { background: var(--health-unknown); }
