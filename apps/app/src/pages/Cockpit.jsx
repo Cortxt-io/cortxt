@@ -12,6 +12,35 @@ const READINESS_LABEL = {
   dark: 'Mörk',
 };
 
+/* Drift/infra-rad — lyser rött när prod kör gammal kod. Stänger hålet som lät en
+ * 5-dygns deploy-frysning gömma sig bakom "allt operativt". Färg paras alltid med
+ * text (a11y, --health-*-regeln). */
+const DRIFT_HEADING = {
+  healthy: 'Drift: prod kör aktuell kod',
+  attention: 'Drift: deploy pågår eller prod nyss bakom',
+  degraded: 'Drift: prod är stale',
+  unknown: 'Drift: status okänd',
+};
+
+function DriftRow({ infra }) {
+  if (!infra) return null;
+  const level = infra.level ?? 'unknown';
+  const detail = infra.checks?.[0]?.feedback ?? '';
+  const behind = level !== 'healthy' && infra.running && infra.main_head
+    ? `${infra.running} → main ${infra.main_head}`
+    : '';
+  return (
+    <div className={`drift drift--${level}`}>
+      <span className="drift-dot" aria-hidden="true" />
+      <div>
+        <strong>{DRIFT_HEADING[level] ?? DRIFT_HEADING.unknown}</strong>
+        {detail && <span className="drift-detail"> — {detail}</span>}
+        {behind && <span className="drift-refs"> · {behind}</span>}
+      </div>
+    </div>
+  );
+}
+
 function Sitrep({ sitrep }) {
   const cells = [
     { key: 'operational', label: 'Operativa' },
@@ -85,6 +114,7 @@ export default function Cockpit() {
 
         {state && !loading && (
           <>
+            <DriftRow infra={state.infra} />
             <Sitrep sitrep={state.sitrep} />
 
             <div className="page-head" style={{ marginTop: '2rem' }}>
