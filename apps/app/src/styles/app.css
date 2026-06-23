@@ -34,6 +34,7 @@
 .vert-epics { margin: 0.4rem 0 0; padding-left: 0.2rem; list-style: none; font-size: 0.85rem; }
 .vert-epics li { margin: 0.15rem 0; color: var(--muted); }
 .vert-epic-done { text-decoration: line-through; opacity: 0.7; }
+.vert-graph { height: 460px; border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; background: var(--bg); }
 
 /* Drift/infra-rad — färg paras alltid med text + prick (a11y) */
 .drift {

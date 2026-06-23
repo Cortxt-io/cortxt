@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Container, Section, Eyebrow, H1, H3, Lead, Card } from '@cortxt/ui';
-import { fetchVertical } from '../lib/cns.js';
+import { NodeGraph } from '@cortxt/graph';
+import { fetchVertical, fetchGraph } from '../lib/cns.js';
 
 /* Per-projekt-vy — ombyggnadens ritning för en vertikal: receptets faser (klar/aktiv/kvar),
  * nyckel-epics per fas, och de öppna besluten. Strategiska lagret (CNS); granulära stories
@@ -29,6 +30,15 @@ export default function Vertical() {
     return () => { cancelled = true; };
   }, [slug]);
 
+  const [graphNodes, setGraphNodes] = useState([]);
+  useEffect(() => {
+    let cancelled = false;
+    fetchGraph(slug)
+      .then((ns) => { if (!cancelled) setGraphNodes(ns); })
+      .catch(() => { if (!cancelled) setGraphNodes([]); });
+    return () => { cancelled = true; };
+  }, [slug]);
+
   const rm = data?.roadmap;
   const v = data?.vertical;
 
@@ -40,6 +50,20 @@ export default function Vertical() {
           <H1>{v?.title ?? slug}</H1>
           {v?.url_live && <Lead><a href={v.url_live} target="_blank" rel="noreferrer">{v.url_live} ↗</a></Lead>}
         </div>
+
+        <div className="page-head" style={{ marginTop: '1.5rem' }}>
+          <Eyebrow>Arkitektur</Eyebrow>
+        </div>
+        {graphNodes.length > 1 ? (
+          <div className="vert-graph">
+            <NodeGraph nodes={graphNodes} />
+          </div>
+        ) : (
+          <p className="placeholder">
+            {slug} är ännu en enda nod — modellera dess interna system i <code>catalog.yaml</code>
+            (<code>part_of: {slug}</code> + feeds/depends_on) för en arkitektur-graf.
+          </p>
+        )}
 
         {loading && <p className="placeholder">Hämtar roadmap…</p>}
         {error && <p className="placeholder">Kunde inte hämta: {error}</p>}
