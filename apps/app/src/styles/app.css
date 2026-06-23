@@ -29,6 +29,11 @@
 .cockpit-order { margin-top: 0.6rem; font-size: 0.9rem; }
 .cockpit-refs { margin-top: 0.4rem; font-size: 0.8rem; color: var(--muted); }
 .vert-live { font-size: 0.75rem; font-weight: 500; color: var(--accent, var(--health-healthy)); margin-left: 0.5rem; }
+.vert-title { color: inherit; text-decoration: none; }
+.vert-title:hover { text-decoration: underline; }
+.vert-epics { margin: 0.4rem 0 0; padding-left: 0.2rem; list-style: none; font-size: 0.85rem; }
+.vert-epics li { margin: 0.15rem 0; color: var(--muted); }
+.vert-epic-done { text-decoration: line-through; opacity: 0.7; }
 
 /* Drift/infra-rad — färg paras alltid med text + prick (a11y) */
 .drift {

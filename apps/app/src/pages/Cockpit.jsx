@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import { Container, Section, Eyebrow, H1, Lead, Grid, Card, H3 } from '@cortxt/ui';
 import useCommandCenter from '../hooks/useCommandCenter.js';
 
@@ -113,17 +114,25 @@ function Verticals({ verticals }) {
         return (
           <Card key={v.slug}>
             <H3>
-              {v.title}
+              <Link to={`/vertikal/${v.slug}`} className="vert-title">{v.title}</Link>
               {v.url_live && (
                 <a href={v.url_live} target="_blank" rel="noreferrer" className="vert-live"> live ↗</a>
               )}
             </H3>
-            <p className="tool-meta">
-              {v.url_live ? 'Live' : 'Ej live'}
-              {deploy ? ` · ${deploy}` : ''}
-              {` · ${v.open_issues} öppna`}
-              {age ? ` · senast aktiv ${age}` : ''}
-            </p>
+            {v.roadmap ? (
+              <p className="tool-meta">
+                Fas {v.roadmap.phase_index}/{v.roadmap.total_phases}
+                {` · ${v.roadmap.current_phase_title}`}
+                {v.roadmap.open_decisions ? ` · ${v.roadmap.open_decisions} beslut väntar` : ''}
+              </p>
+            ) : (
+              <p className="tool-meta">
+                {v.url_live ? 'Live' : 'Ej live'}
+                {deploy ? ` · ${deploy}` : ''}
+                {age ? ` · senast aktiv ${age}` : ''}
+                {' · ingen roadmap'}
+              </p>
+            )}
             <p className="cockpit-order">{v.next_step}</p>
           </Card>
         );

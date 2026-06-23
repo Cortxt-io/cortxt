@@ -72,3 +72,9 @@ export async function fetchModelIssues(slug) {
 export async function fetchCommandCenter() {
   return getJSON('/api/command-center');
 }
+
+/* Per-vertical roadmap detail (recipe phases + status/epics + open decisions) for the
+ * per-project view. Wraps GET /api/vertical/<slug>. */
+export async function fetchVertical(slug) {
+  return getJSON(`/api/vertical/${encodeURIComponent(slug)}`);
+}
