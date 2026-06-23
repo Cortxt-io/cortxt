@@ -6,7 +6,7 @@ export default defineConfig({
   base: '/',
   // @cortxt/ui ships source JSX (no build step); exclude it from pre-bundling so
   // Vite transforms it as first-party source.
-  optimizeDeps: { exclude: ['@cortxt/ui'] },
+  optimizeDeps: { exclude: ['@cortxt/ui', '@cortxt/graph'] },
   // Dev-only: mirror the prod /api/* → Railway rewrite (vercel.json) so cns.js can
   // run same-origin locally without hitting CORS. Prod uses the Vercel rewrite.
   server: {

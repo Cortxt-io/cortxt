@@ -78,3 +78,10 @@ export async function fetchCommandCenter() {
 export async function fetchVertical(slug) {
   return getJSON(`/api/vertical/${encodeURIComponent(slug)}`);
 }
+
+/* Raw nodes for one domain's architecture graph — NOT normalizeModel (the graph needs
+ * part_of/feeds/depends_on/kind which normalization drops). Wraps GET /api/nodes?domain=. */
+export async function fetchGraph(domain) {
+  const data = await getJSON(`/api/nodes?domain=${encodeURIComponent(domain)}`);
+  return data.nodes ?? [];
+}
