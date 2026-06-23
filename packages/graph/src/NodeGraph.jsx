@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import ReactFlow, {
   Background,
   Controls,
@@ -12,12 +12,13 @@ import ELK from 'elkjs/lib/elk.bundled.js';
  *
  * Lean, fetch-free ELK-laid-out node graph. Feed it CNS-shaped nodes
  * ({slug, title, kind, part_of, feeds[], depends_on[], health}) and it lays them
- * out (ELK layered, RIGHT) and renders feeds (blue) / depends_on (amber) /
- * part_of (faint, child→parent) edges with kind-coloured nodes + a health dot.
+ * out (ELK layered, RIGHT) and renders feeds/depends_on/part_of edges with
+ * kind-coloured nodes + a health dot.
  *
- * Reuses the dashboard's proven ELK options + feeds/depends_on edge mapping, but
- * flat (no container nesting) — these per-product graphs are small. Props in, no
- * data fetching (the consumer owns that). */
+ * Selection-aware (the command-center signature): pass `selected` (slug) + `highlight`
+ * (slugs to keep lit) + `onNodeClick`. The selected node gets an accent ring; everything
+ * outside {selected ∪ highlight} dims. Layout (ELK) only re-runs when nodes change; the
+ * selection styling is cheap (no re-layout). */
 
 const elk = new ELK();
 
@@ -33,17 +34,11 @@ const ELK_OPTIONS = {
 const NODE_W = 190;
 const NODE_H = 56;
 
-const KIND_COLOR = {
-  framework: '#a78bfa',
-  system: '#4ec9b0',
-  component: '#60a5fa',
-};
+const KIND_COLOR = { framework: '#a78bfa', system: '#4ec9b0', component: '#60a5fa' };
 const HEALTH_COLOR = {
-  healthy: '#4ec9b0',
-  attention: '#fbbf24',
-  degraded: '#fb7185',
-  unknown: '#64748b',
+  healthy: '#4ec9b0', attention: '#fbbf24', degraded: '#fb7185', unknown: '#64748b',
 };
+const ACCENT = '#4ec9b0';
 const FEEDS = '#4ec9b0';
 const DEPENDS = '#fbbf24';
 
@@ -53,17 +48,21 @@ function CnsNode({ data }) {
   return (
     <div style={{
       width: NODE_W, height: NODE_H, boxSizing: 'border-box',
-      borderLeft: `4px solid ${kindColor}`, borderRadius: 8,
-      background: 'var(--surface, #1b1e24)', border: '1px solid var(--border, #2a2e37)',
-      borderLeftWidth: 4, borderLeftColor: kindColor,
+      borderRadius: 8, background: 'var(--surface, #1b1e24)',
+      border: `1px solid ${data.selected ? ACCENT : 'var(--border, #2a2e37)'}`,
+      borderLeft: `4px solid ${kindColor}`,
+      boxShadow: data.selected ? `0 0 0 2px ${ACCENT}55` : 'none',
       padding: '8px 10px', display: 'flex', flexDirection: 'column', justifyContent: 'center',
       color: 'var(--text, #e8eaed)', fontSize: 13, overflow: 'hidden',
+      opacity: data.dimmed ? 0.3 : 1,
+      transition: 'opacity 160ms ease, box-shadow 160ms ease, border-color 160ms ease',
+      cursor: 'pointer',
     }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontWeight: 600 }}>
         <span style={{ width: 8, height: 8, borderRadius: '50%', background: healthColor, flex: '0 0 auto' }} />
         <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{data.label}</span>
       </div>
-      {data.kind && <div style={{ fontSize: 11, opacity: 0.6, marginTop: 2 }}>{data.kind}</div>}
+      {data.kind && <div style={{ fontSize: 11, opacity: 0.6, marginTop: 2, fontFamily: 'var(--font-mono, monospace)' }}>{data.kind}</div>}
     </div>
   );
 }
@@ -96,38 +95,64 @@ function buildEdges(nodes) {
   return edges;
 }
 
-function Inner({ nodes: rawNodes }) {
-  const [nodes, setNodes] = useState([]);
-  const [edges, setEdges] = useState([]);
+function Inner({ nodes: rawNodes, selected, highlight, onNodeClick }) {
+  const [positions, setPositions] = useState(null);
+  const baseEdges = useMemo(() => buildEdges(rawNodes), [rawNodes]);
 
   useEffect(() => {
     let cancelled = false;
-    const rfEdges = buildEdges(rawNodes);
     const graph = {
       id: 'root',
       layoutOptions: ELK_OPTIONS,
       children: rawNodes.map((n) => ({ id: n.slug, width: NODE_W, height: NODE_H })),
-      edges: rfEdges.map((e) => ({ id: e.id, sources: [e.source], targets: [e.target] })),
+      edges: baseEdges.map((e) => ({ id: e.id, sources: [e.source], targets: [e.target] })),
     };
     elk.layout(graph).then((laid) => {
       if (cancelled) return;
-      const pos = Object.fromEntries((laid.children || []).map((c) => [c.id, { x: c.x, y: c.y }]));
-      setNodes(rawNodes.map((n) => ({
-        id: n.slug,
-        type: 'cns',
-        position: pos[n.slug] || { x: 0, y: 0 },
-        data: { label: n.title || n.slug, kind: n.kind, health: n.health?.level },
-      })));
-      setEdges(rfEdges);
-    }).catch(() => { if (!cancelled) { setNodes([]); setEdges([]); } });
+      setPositions(Object.fromEntries((laid.children || []).map((c) => [c.id, { x: c.x, y: c.y }])));
+    }).catch(() => { if (!cancelled) setPositions({}); });
     return () => { cancelled = true; };
-  }, [rawNodes]);
+  }, [rawNodes, baseEdges]);
+
+  // Selection set: the selected node + its explicit highlight neighbours. When nothing is
+  // selected, everything is lit (no dimming).
+  const lit = useMemo(() => {
+    if (!selected) return null;
+    return new Set([selected, ...(highlight || [])]);
+  }, [selected, highlight]);
+
+  const nodes = useMemo(() => {
+    if (!positions) return [];
+    return rawNodes.map((n) => ({
+      id: n.slug,
+      type: 'cns',
+      position: positions[n.slug] || { x: 0, y: 0 },
+      data: {
+        label: n.title || n.slug,
+        kind: n.kind,
+        health: n.health?.level,
+        selected: n.slug === selected,
+        dimmed: lit ? !lit.has(n.slug) : false,
+      },
+    }));
+  }, [rawNodes, positions, selected, lit]);
+
+  const edges = useMemo(() => {
+    if (!lit) return baseEdges;
+    return baseEdges.map((e) => ({
+      ...e,
+      style: { ...e.style, opacity: lit.has(e.source) && lit.has(e.target) ? 1 : 0.15 },
+    }));
+  }, [baseEdges, lit]);
 
   return (
     <ReactFlow
       nodes={nodes}
       edges={edges}
       nodeTypes={nodeTypes}
+      nodesDraggable={false}
+      nodesConnectable={false}
+      onNodeClick={(_, n) => onNodeClick?.(n.id)}
       fitView
       proOptions={{ hideAttribution: true }}
       minZoom={0.2}
@@ -138,11 +163,11 @@ function Inner({ nodes: rawNodes }) {
   );
 }
 
-export default function NodeGraph({ nodes }) {
+export default function NodeGraph({ nodes, selected = null, highlight = [], onNodeClick }) {
   if (!nodes?.length) return null;
   return (
     <ReactFlowProvider>
-      <Inner nodes={nodes} />
+      <Inner nodes={nodes} selected={selected} highlight={highlight} onNodeClick={onNodeClick} />
     </ReactFlowProvider>
   );
 }
