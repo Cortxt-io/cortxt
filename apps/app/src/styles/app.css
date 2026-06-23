@@ -36,6 +36,30 @@
 .vert-epic-done { text-decoration: line-through; opacity: 0.7; }
 .vert-graph { height: 460px; border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; background: var(--bg); }
 
+/* Vertikalens kommandocenter — multi-panel, instrument-konsol */
+.cc-status { font-size: 0.85rem; color: var(--muted); margin-top: 0.4rem; }
+.cc-grid { display: grid; grid-template-columns: 1.6fr 1fr; gap: 1rem; margin-top: 1.25rem; }
+@media (max-width: 860px) { .cc-grid { grid-template-columns: 1fr; } }
+.cc-panel { border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); overflow: hidden; display: flex; flex-direction: column; }
+.cc-panel-head { font-family: var(--font-mono, monospace); font-size: 0.7rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); padding: 0.6rem 0.9rem; border-bottom: 1px solid var(--border); }
+.cc-graph { height: 460px; }
+.cc-readout { padding: 0.9rem; }
+.cc-summary { font-size: 0.9rem; margin: 0.4rem 0; }
+.cc-meta { font-size: 0.8rem; color: var(--muted); margin: 0.3rem 0; }
+.cc-sub { font-family: var(--font-mono, monospace); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); margin-top: 0.8rem; }
+.cc-dim { color: var(--muted); font-size: 0.8rem; }
+.cc-list { margin: 0.3rem 0 0; padding-left: 0.2rem; list-style: none; font-size: 0.85rem; }
+.cc-list li { margin: 0.2rem 0; }
+.cc-rail { margin-top: 1rem; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); padding: 0.9rem; }
+.cc-phase { border-left: 3px solid var(--border); padding: 0.4rem 0 0.4rem 0.7rem; margin: 0.5rem 0; }
+.cc-phase--done { border-left-color: var(--health-healthy); }
+.cc-phase--active { border-left-color: var(--accent, var(--health-attention)); }
+.cc-phase--todo { border-left-color: var(--border); }
+.cc-decision { border: 1px solid var(--border); border-left-width: 3px; border-radius: var(--radius); padding: 0.5rem 0.7rem; margin: 0.4rem 0; }
+.cc-linked { cursor: pointer; }
+.cc-linked:hover { border-left-color: var(--accent, #4ec9b0); }
+.cc-lit { border-left-color: var(--accent, #4ec9b0) !important; box-shadow: inset 2px 0 0 var(--accent, #4ec9b0); background: color-mix(in srgb, var(--accent, #4ec9b0) 8%, transparent); }
+
 /* Drift/infra-rad — färg paras alltid med text + prick (a11y) */
 .drift {
   display: flex; align-items: flex-start; gap: 0.6rem;
