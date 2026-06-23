@@ -93,6 +93,45 @@ function Orders({ orders }) {
   );
 }
 
+function fmtAge(s) {
+  if (s == null) return null;
+  const d = Math.floor(s / 86400);
+  if (d >= 1) return `${d}d sedan`;
+  const h = Math.floor(s / 3600);
+  return h >= 1 ? `${h}h sedan` : 'nyss';
+}
+
+/* Vertikaler — per-produkt läge + nästa drag. Svaret på "vad gör jag med infon":
+ * var står juvahem/bkfinans/orgkomp/crusade och vad är nästa steg för var och en. */
+function Verticals({ verticals }) {
+  if (!verticals?.length) return null;
+  return (
+    <Grid cols={2}>
+      {verticals.map((v) => {
+        const age = fmtAge(v.activity?.last_commit_age_s);
+        const deploy = v.deploy?.state && v.deploy.state !== 'unknown' ? v.deploy.state : null;
+        return (
+          <Card key={v.slug}>
+            <H3>
+              {v.title}
+              {v.url_live && (
+                <a href={v.url_live} target="_blank" rel="noreferrer" className="vert-live"> live ↗</a>
+              )}
+            </H3>
+            <p className="tool-meta">
+              {v.url_live ? 'Live' : 'Ej live'}
+              {deploy ? ` · ${deploy}` : ''}
+              {` · ${v.open_issues} öppna`}
+              {age ? ` · senast aktiv ${age}` : ''}
+            </p>
+            <p className="cockpit-order">{v.next_step}</p>
+          </Card>
+        );
+      })}
+    </Grid>
+  );
+}
+
 export default function Cockpit() {
   const { state, loading, error } = useCommandCenter();
 
@@ -116,6 +155,11 @@ export default function Cockpit() {
           <>
             <DriftRow infra={state.infra} />
             <Sitrep sitrep={state.sitrep} />
+
+            <div className="page-head" style={{ marginTop: '2rem' }}>
+              <Eyebrow>Vertikaler</Eyebrow>
+            </div>
+            <Verticals verticals={state.verticals} />
 
             <div className="page-head" style={{ marginTop: '2rem' }}>
               <Eyebrow>Uppdrag</Eyebrow>
