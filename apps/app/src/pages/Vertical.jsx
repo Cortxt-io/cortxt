@@ -105,9 +105,11 @@ export default function Vertical() {
         <div className="cc-panel cc-mappanel">
           <div className="cc-panel-head">Arkitektur</div>
           {graphNodes.length > 1 ? (
-            <div className="cc-graph">
-              <NodeGraph nodes={graphNodes} selected={selected} highlight={highlight} onNodeClick={(s) => setSelected((cur) => (cur === s ? null : s))} />
-              {!selNode && <span className="cc-graph-hint">Välj en nod för att fokusera planen.</span>}
+            <>
+              <div className="cc-graph">
+                <NodeGraph nodes={graphNodes} selected={selected} highlight={highlight} onNodeClick={(s) => setSelected((cur) => (cur === s ? null : s))} />
+                {!selNode && <span className="cc-graph-hint">Välj en nod för att fokusera planen.</span>}
+              </div>
               {selNode && (
                 <div className="cc-readout-overlay">
                   <button className="cc-readout-close" type="button" onClick={() => setSelected(null)} aria-label="Stäng">✕</button>
@@ -127,7 +129,7 @@ export default function Vertical() {
                   )}
                 </div>
               )}
-            </div>
+            </>
           ) : (
             <p className="placeholder">
               {slug} är ännu en enda nod — modellera dess interna system i <code>catalog.yaml</code>.
