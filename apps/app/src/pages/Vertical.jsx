@@ -30,6 +30,7 @@ export default function Vertical() {
   const [graphNodes, setGraphNodes] = useState([]);
   const [error, setError] = useState(null);
   const [selected, setSelected] = useState(null);
+  const [tab, setTab] = useState('roadmap'); // plan tab: roadmap | bygg | beslut
 
   useEffect(() => {
     let cancelled = false;
@@ -79,6 +80,11 @@ export default function Vertical() {
   );
 
   const selNode = selected ? nodeBySlug[selected] : null;
+
+  // Plan surfaces (roadmap / bygg-guide / decisions) become tabs — one at a time, not
+  // three stacked rails. Show only available tabs; fall back if the current one is empty.
+  const availTabs = [rm && 'roadmap', cookbook && 'bygg', rm && 'beslut'].filter(Boolean);
+  const activeTab = availTabs.includes(tab) ? tab : (availTabs[0] ?? 'roadmap');
 
   return (
     <Section>
@@ -156,87 +162,105 @@ export default function Vertical() {
           </div>
         </div>
 
-        {/* Roadmap-rail */}
-        {rm && (
+        {/* Plan — Roadmap / Bygg-guide / Beslut som flikar (en i taget, ej staplade). */}
+        {availTabs.length > 0 && (
           <div className="cc-rail">
-            <div className="cc-panel-head">Roadmap</div>
-            {rm.phases.map((p) => {
-              const st = PHASE_STATUS[p.status] ?? PHASE_STATUS.todo;
-              return (
-                <div key={p.key} className={`cc-phase ${st.cls}`}>
-                  <strong>{p.title}</strong> <span className="cc-dim">· {st.label}{p.key === rm.current_phase ? ' · här' : ''}</span>
-                  {p.epics?.length > 0 && (
-                    <ul className="cc-list">
-                      {p.epics.map((e, i) => {
-                        const refs = nodeRefs(e);
-                        return (
-                          <li
-                            key={i}
-                            className={`${e.done ? 'vert-epic-done' : ''} ${refs.length ? 'cc-linked' : ''} ${touches(e, selected) ? 'cc-lit' : ''}`}
-                            onClick={refs.length ? () => setSelected(refs[0]) : undefined}
-                          >
-                            {e.done ? '✓ ' : '○ '}{e.title}<NodeTags item={e} />
-                          </li>
-                        );
-                      })}
-                    </ul>
-                  )}
-                </div>
-              );
-            })}
-            <div className="cc-panel-head" style={{ marginTop: '1rem' }}>Öppna beslut</div>
-            {rm.open_decisions.length === 0 ? (
-              <p className="cc-dim">Inga öppna beslut.</p>
-            ) : rm.open_decisions.map((d, i) => {
-              const refs = nodeRefs(d);
-              return (
-                <div
-                  key={i}
-                  className={`cc-decision ${refs.length ? 'cc-linked' : ''} ${touches(d, selected) ? 'cc-lit' : ''}`}
-                  onClick={refs.length ? () => setSelected(refs[0]) : undefined}
-                >
-                  <strong>{d.title}</strong><NodeTags item={d} />
-                  {d.why && <p className="cc-meta">{d.why}</p>}
-                </div>
-              );
-            })}
-          </div>
-        )}
-
-        {/* Bygg-guide — levande, AI-underhållen cookbook per produkt */}
-        {cookbook && (
-          <div className="cc-rail">
-            <div className="cc-panel-head">
-              Bygg-guide
-              {cookbook.generated_at && <span className="cc-dim"> · senast genererad {cookbook.generated_at}{cookbook.source === 'seed' ? ' · seed' : ''}</span>}
+            <div className="cc-tabs" role="tablist" aria-label="Plan">
+              {rm && (
+                <button className={`cc-tab ${activeTab === 'roadmap' ? 'active' : ''}`} role="tab" type="button"
+                  aria-selected={activeTab === 'roadmap'} onClick={() => setTab('roadmap')}>Roadmap</button>
+              )}
+              {cookbook && (
+                <button className={`cc-tab ${activeTab === 'bygg' ? 'active' : ''}`} role="tab" type="button"
+                  aria-selected={activeTab === 'bygg'} onClick={() => setTab('bygg')}>Bygg-guide</button>
+              )}
+              {rm && (
+                <button className={`cc-tab ${activeTab === 'beslut' ? 'active' : ''}`} role="tab" type="button"
+                  aria-selected={activeTab === 'beslut'} onClick={() => setTab('beslut')}>
+                  Beslut{rm.open_decisions.length ? ` (${rm.open_decisions.length})` : ''}
+                </button>
+              )}
             </div>
-            {['backend', 'ui_ux'].map((disc) => {
-              const steps = cookbook.steps.filter((s) => s.discipline === disc);
-              if (!steps.length) return null;
-              return (
-                <div key={disc} style={{ marginTop: '0.6rem' }}>
-                  <div className="cc-sub">{disc === 'ui_ux' ? 'UI/UX' : 'Backend'}</div>
-                  <ol className="cc-steps">
-                    {steps.map((s, i) => {
-                      const refs = nodeRefs(s);
-                      return (
-                        <li
-                          key={s.key || i}
-                          className={`${refs.length ? 'cc-linked' : ''} ${touches(s, selected) ? 'cc-lit' : ''}`}
-                          onClick={refs.length ? () => setSelected(refs[0]) : undefined}
-                        >
-                          <strong>{s.title}</strong><NodeTags item={s} />
-                          {s.detail && <p className="cc-meta">{s.detail}</p>}
-                        </li>
-                      );
-                    })}
-                  </ol>
-                </div>
-              );
-            })}
-            {cookbook.source === 'seed' && (
-              <p className="cc-dim" style={{ marginTop: '0.6rem' }}>Seed — kör <code>cns cookbook {slug}</code> (med ANTHROPIC_API_KEY) för en AI-genererad version mot nuläget.</p>
-            )}
+
+            <div className="cc-tabpanel">
+              {activeTab === 'roadmap' && rm && rm.phases.map((p) => {
+                const st = PHASE_STATUS[p.status] ?? PHASE_STATUS.todo;
+                return (
+                  <div key={p.key} className={`cc-phase ${st.cls}`}>
+                    <strong>{p.title}</strong> <span className="cc-dim">· {st.label}{p.key === rm.current_phase ? ' · här' : ''}</span>
+                    {p.epics?.length > 0 && (
+                      <ul className="cc-list">
+                        {p.epics.map((e, i) => {
+                          const refs = nodeRefs(e);
+                          return (
+                            <li
+                              key={i}
+                              className={`${e.done ? 'vert-epic-done' : ''} ${refs.length ? 'cc-linked' : ''} ${touches(e, selected) ? 'cc-lit' : ''}`}
+                              onClick={refs.length ? () => setSelected(refs[0]) : undefined}
+                            >
+                              {e.done ? '✓ ' : '○ '}{e.title}<NodeTags item={e} />
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    )}
+                  </div>
+                );
+              })}
+
+              {activeTab === 'bygg' && cookbook && (
+                <>
+                  {cookbook.generated_at && (
+                    <p className="cc-dim" style={{ marginTop: 0 }}>senast genererad {cookbook.generated_at}{cookbook.source === 'seed' ? ' · seed' : ''}</p>
+                  )}
+                  {['backend', 'ui_ux'].map((disc) => {
+                    const steps = cookbook.steps.filter((s) => s.discipline === disc);
+                    if (!steps.length) return null;
+                    return (
+                      <div key={disc} style={{ marginTop: '0.6rem' }}>
+                        <div className="cc-sub">{disc === 'ui_ux' ? 'UI/UX' : 'Backend'}</div>
+                        <ol className="cc-steps">
+                          {steps.map((s, i) => {
+                            const refs = nodeRefs(s);
+                            return (
+                              <li
+                                key={s.key || i}
+                                className={`${refs.length ? 'cc-linked' : ''} ${touches(s, selected) ? 'cc-lit' : ''}`}
+                                onClick={refs.length ? () => setSelected(refs[0]) : undefined}
+                              >
+                                <strong>{s.title}</strong><NodeTags item={s} />
+                                {s.detail && <p className="cc-meta">{s.detail}</p>}
+                              </li>
+                            );
+                          })}
+                        </ol>
+                      </div>
+                    );
+                  })}
+                  {cookbook.source === 'seed' && (
+                    <p className="cc-dim" style={{ marginTop: '0.6rem' }}>Seed — kör <code>cns cookbook {slug}</code> (med ANTHROPIC_API_KEY) för en AI-genererad version mot nuläget.</p>
+                  )}
+                </>
+              )}
+
+              {activeTab === 'beslut' && rm && (
+                rm.open_decisions.length === 0 ? (
+                  <p className="cc-dim">Inga öppna beslut.</p>
+                ) : rm.open_decisions.map((d, i) => {
+                  const refs = nodeRefs(d);
+                  return (
+                    <div
+                      key={i}
+                      className={`cc-decision ${refs.length ? 'cc-linked' : ''} ${touches(d, selected) ? 'cc-lit' : ''}`}
+                      onClick={refs.length ? () => setSelected(refs[0]) : undefined}
+                    >
+                      <strong>{d.title}</strong><NodeTags item={d} />
+                      {d.why && <p className="cc-meta">{d.why}</p>}
+                    </div>
+                  );
+                })
+              )}
+            </div>
           </div>
         )}
       </Container>
