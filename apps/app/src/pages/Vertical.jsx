@@ -15,6 +15,15 @@ const PHASE_STATUS = {
 };
 const HEALTH_LABEL = { healthy: 'Frisk', attention: 'Bevakas', degraded: 'Försämrad', unknown: 'Okänd' };
 
+// En eller flera noder per del (epic/beslut/bygg-guide-steg). Bakåtkompat: läs `nodes`-lista
+// eller en singulär `node`. Allt korslänkas mot grafen via samma helper.
+const nodeRefs = (item) => item?.nodes ?? (item?.node ? [item.node] : []);
+const touches = (item, slug) => !!slug && nodeRefs(item).includes(slug);
+const NodeTags = ({ item }) => {
+  const refs = nodeRefs(item);
+  return refs.length ? <span className="cc-dim"> ·{refs.join(' ·')}</span> : null;
+};
+
 export default function Vertical() {
   const { slug } = useParams();
   const [data, setData] = useState(null);
@@ -55,14 +64,18 @@ export default function Vertical() {
     return [...set];
   }, [selected, graphNodes, nodeBySlug]);
 
-  // Faser/beslut som rör vald nod (via epic/decision.node-referensen).
+  // Epics/beslut/bygg-guide-steg som rör vald nod (en-eller-flera-noder-ref).
   const relatedEpics = useMemo(() => {
     if (!selected || !rm) return [];
-    return rm.phases.flatMap((p) => (p.epics || []).filter((e) => e.node === selected).map((e) => ({ ...e, phase: p.title })));
+    return rm.phases.flatMap((p) => (p.epics || []).filter((e) => touches(e, selected)).map((e) => ({ ...e, phase: p.title })));
   }, [selected, rm]);
   const relatedDecisions = useMemo(
-    () => (selected && rm ? rm.open_decisions.filter((d) => d.node === selected) : []),
+    () => (selected && rm ? rm.open_decisions.filter((d) => touches(d, selected)) : []),
     [selected, rm],
+  );
+  const relatedSteps = useMemo(
+    () => (selected && cookbook ? cookbook.steps.filter((s) => touches(s, selected)) : []),
+    [selected, cookbook],
   );
 
   const selNode = selected ? nodeBySlug[selected] : null;
@@ -122,8 +135,14 @@ export default function Vertical() {
                     <ul className="cc-list">{relatedDecisions.map((d, i) => <li key={i}>{d.title}</li>)}</ul>
                   </>
                 )}
-                {relatedEpics.length === 0 && relatedDecisions.length === 0 && (
-                  <p className="cc-dim">Inga länkade epics/beslut än — lägg <code>node: {selected}</code> på en epic i roadmappen.</p>
+                {relatedSteps.length > 0 && (
+                  <>
+                    <div className="cc-sub">Bygg-guide-steg som rör noden</div>
+                    <ul className="cc-list">{relatedSteps.map((s, i) => <li key={i}>{s.done ? '✓ ' : '○ '}{s.title} <span className="cc-dim">({s.discipline === 'ui_ux' ? 'UI/UX' : 'Backend'})</span></li>)}</ul>
+                  </>
+                )}
+                {relatedEpics.length === 0 && relatedDecisions.length === 0 && relatedSteps.length === 0 && (
+                  <p className="cc-dim">Inga länkade epics/beslut/steg än — lägg <code>nodes: [{selected}]</code> på en epic eller bygg-guide-steg.</p>
                 )}
               </div>
             ) : (
@@ -149,14 +168,14 @@ export default function Vertical() {
                   {p.epics?.length > 0 && (
                     <ul className="cc-list">
                       {p.epics.map((e, i) => {
-                        const lit = e.node && e.node === selected;
+                        const refs = nodeRefs(e);
                         return (
                           <li
                             key={i}
-                            className={`${e.done ? 'vert-epic-done' : ''} ${e.node ? 'cc-linked' : ''} ${lit ? 'cc-lit' : ''}`}
-                            onClick={e.node ? () => setSelected(e.node) : undefined}
+                            className={`${e.done ? 'vert-epic-done' : ''} ${refs.length ? 'cc-linked' : ''} ${touches(e, selected) ? 'cc-lit' : ''}`}
+                            onClick={refs.length ? () => setSelected(refs[0]) : undefined}
                           >
-                            {e.done ? '✓ ' : '○ '}{e.title}{e.node ? <span className="cc-dim"> ·{e.node}</span> : null}
+                            {e.done ? '✓ ' : '○ '}{e.title}<NodeTags item={e} />
                           </li>
                         );
                       })}
@@ -169,14 +188,14 @@ export default function Vertical() {
             {rm.open_decisions.length === 0 ? (
               <p className="cc-dim">Inga öppna beslut.</p>
             ) : rm.open_decisions.map((d, i) => {
-              const lit = d.node && d.node === selected;
+              const refs = nodeRefs(d);
               return (
                 <div
                   key={i}
-                  className={`cc-decision ${d.node ? 'cc-linked' : ''} ${lit ? 'cc-lit' : ''}`}
-                  onClick={d.node ? () => setSelected(d.node) : undefined}
+                  className={`cc-decision ${refs.length ? 'cc-linked' : ''} ${touches(d, selected) ? 'cc-lit' : ''}`}
+                  onClick={refs.length ? () => setSelected(refs[0]) : undefined}
                 >
-                  <strong>{d.title}</strong>{d.node ? <span className="cc-dim"> ·{d.node}</span> : null}
+                  <strong>{d.title}</strong><NodeTags item={d} />
                   {d.why && <p className="cc-meta">{d.why}</p>}
                 </div>
               );
@@ -198,12 +217,19 @@ export default function Vertical() {
                 <div key={disc} style={{ marginTop: '0.6rem' }}>
                   <div className="cc-sub">{disc === 'ui_ux' ? 'UI/UX' : 'Backend'}</div>
                   <ol className="cc-steps">
-                    {steps.map((s, i) => (
-                      <li key={s.key || i}>
-                        <strong>{s.title}</strong>
-                        {s.detail && <p className="cc-meta">{s.detail}</p>}
-                      </li>
-                    ))}
+                    {steps.map((s, i) => {
+                      const refs = nodeRefs(s);
+                      return (
+                        <li
+                          key={s.key || i}
+                          className={`${refs.length ? 'cc-linked' : ''} ${touches(s, selected) ? 'cc-lit' : ''}`}
+                          onClick={refs.length ? () => setSelected(refs[0]) : undefined}
+                        >
+                          <strong>{s.title}</strong><NodeTags item={s} />
+                          {s.detail && <p className="cc-meta">{s.detail}</p>}
+                        </li>
+                      );
+                    })}
                   </ol>
                 </div>
               );
