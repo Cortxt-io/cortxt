@@ -42,11 +42,16 @@
 @media (max-width: 860px) { .cc-grid { grid-template-columns: 1fr; } }
 .cc-panel { border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); overflow: hidden; display: flex; flex-direction: column; }
 .cc-panel-head { font-family: var(--font-mono, monospace); font-size: 0.7rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); padding: 0.6rem 0.9rem; border-bottom: 1px solid var(--border); }
-.cc-mappanel { margin-top: 1.25rem; }
-.cc-graph { height: 400px; position: relative; }
-.cc-readout-overlay { position: absolute; left: 12px; bottom: 12px; width: min(300px, calc(100% - 24px)); max-height: calc(100% - 24px); overflow-y: auto; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 0.8rem 0.9rem; box-shadow: 0 8px 28px rgba(0,0,0,0.28); }
+.cc-mappanel { margin-top: 1.25rem; position: relative; }
+.cc-graph { height: 520px; position: relative; }
+/* Readout: floating overlay over the graph on desktop … */
+.cc-readout-overlay { position: absolute; left: 12px; bottom: 12px; z-index: 5; width: min(300px, calc(100% - 24px)); max-height: calc(100% - 24px); overflow-y: auto; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 0.8rem 0.9rem; box-shadow: 0 8px 28px rgba(0,0,0,0.28); }
 .cc-readout-close { position: absolute; top: 6px; right: 8px; border: 0; background: none; color: var(--muted); cursor: pointer; font-size: 0.95rem; line-height: 1; padding: 4px; }
 .cc-graph-hint { position: absolute; left: 12px; bottom: 12px; font-size: 0.8rem; color: var(--muted); background: color-mix(in srgb, var(--surface) 88%, transparent); padding: 4px 8px; border-radius: 6px; pointer-events: none; }
+/* … and a stacked section below the graph on mobile (no covering the map / pan-zoom clash). */
+@media (max-width: 1000px) {
+  .cc-readout-overlay { position: static; width: auto; max-height: none; overflow: visible; border: 0; border-top: 1px solid var(--border); border-radius: 0; box-shadow: none; }
+}
 .cc-readout { padding: 0.9rem; }
 .cc-summary { font-size: 0.9rem; margin: 0.4rem 0; }
 .cc-meta { font-size: 0.8rem; color: var(--muted); margin: 0.3rem 0; }
