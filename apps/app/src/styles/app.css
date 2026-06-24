@@ -59,6 +59,10 @@
 .cc-linked { cursor: pointer; }
 .cc-linked:hover { border-left-color: var(--accent, #4ec9b0); }
 .cc-lit { border-left-color: var(--accent, #4ec9b0) !important; box-shadow: inset 2px 0 0 var(--accent, #4ec9b0); background: color-mix(in srgb, var(--accent, #4ec9b0) 8%, transparent); }
+.cc-steps { margin: 0.3rem 0 0; padding-left: 1.4rem; font-size: 0.9rem; }
+.cc-steps li { margin: 0.5rem 0; }
+.cc-steps li::marker { font-family: var(--font-mono, monospace); color: var(--accent, #4ec9b0); font-size: 0.8rem; }
+.cc-steps strong { font-size: 0.92rem; }
 
 /* Drift/infra-rad — färg paras alltid med text + prick (a11y) */
 .drift {

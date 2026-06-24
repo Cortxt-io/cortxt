@@ -85,3 +85,9 @@ export async function fetchGraph(domain) {
   const data = await getJSON(`/api/nodes?domain=${encodeURIComponent(domain)}`);
   return data.nodes ?? [];
 }
+
+/* A product's AI-maintained build cookbook (steps grouped by discipline). Wraps
+ * GET /api/cookbook/<slug>; generation runs offline (`cns cookbook <slug>`). */
+export async function fetchCookbook(slug) {
+  return getJSON(`/api/cookbook/${encodeURIComponent(slug)}`);
+}
