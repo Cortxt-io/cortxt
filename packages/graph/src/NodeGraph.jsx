@@ -219,13 +219,18 @@ function Inner({ nodes: rawNodes, selected, highlight, onNodeClick }) {
     }));
   }, [visibleNodes, positions, selected, lit, childCount, collapsed, toggleCollapse]);
 
+  // Gate edges on positions so nodes + edges appear in the SAME commit. Otherwise the first
+  // render hands ReactFlow edges whose source/target nodes don't exist yet (nodes is [] until
+  // ELK resolves) → those edges are dropped and never revived (same array ref on the next
+  // commit). Returning [] until positions are ready makes the populated array a fresh ref.
   const edges = useMemo(() => {
+    if (!positions) return [];
     if (!lit) return baseEdges;
     return baseEdges.map((e) => ({
       ...e,
       style: { ...e.style, opacity: lit.has(e.source) && lit.has(e.target) ? 1 : 0.15 },
     }));
-  }, [baseEdges, lit]);
+  }, [positions, baseEdges, lit]);
 
   return (
     <ReactFlow
