@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Container, Section, Eyebrow, H1, H3 } from '@cortxt/ui';
 import { NodeGraph } from '@cortxt/graph';
-import { fetchVertical, fetchGraph } from '../lib/cns.js';
+import { fetchVertical, fetchGraph, fetchCookbook } from '../lib/cns.js';
 
 /* Vertikalens kommandocenter — multi-panel, korslänkad. Grafen är kartan; en vald nod
  * drar ihop graf + plan + beslut till ett fokus: grafen dämpar allt utom noden + grannar,
@@ -31,8 +31,13 @@ export default function Vertical() {
     fetchGraph(slug)
       .then((ns) => { if (!cancelled) setGraphNodes(ns); })
       .catch(() => { if (!cancelled) setGraphNodes([]); });
+    fetchCookbook(slug)
+      .then((cb) => { if (!cancelled) setCookbook(cb?.steps?.length ? cb : null); })
+      .catch(() => { if (!cancelled) setCookbook(null); });
     return () => { cancelled = true; };
   }, [slug]);
+
+  const [cookbook, setCookbook] = useState(null);
 
   const rm = data?.roadmap;
   const v = data?.vertical;
@@ -176,6 +181,36 @@ export default function Vertical() {
                 </div>
               );
             })}
+          </div>
+        )}
+
+        {/* Bygg-guide — levande, AI-underhållen cookbook per produkt */}
+        {cookbook && (
+          <div className="cc-rail">
+            <div className="cc-panel-head">
+              Bygg-guide
+              {cookbook.generated_at && <span className="cc-dim"> · senast genererad {cookbook.generated_at}{cookbook.source === 'seed' ? ' · seed' : ''}</span>}
+            </div>
+            {['backend', 'ui_ux'].map((disc) => {
+              const steps = cookbook.steps.filter((s) => s.discipline === disc);
+              if (!steps.length) return null;
+              return (
+                <div key={disc} style={{ marginTop: '0.6rem' }}>
+                  <div className="cc-sub">{disc === 'ui_ux' ? 'UI/UX' : 'Backend'}</div>
+                  <ol className="cc-steps">
+                    {steps.map((s, i) => (
+                      <li key={s.key || i}>
+                        <strong>{s.title}</strong>
+                        {s.detail && <p className="cc-meta">{s.detail}</p>}
+                      </li>
+                    ))}
+                  </ol>
+                </div>
+              );
+            })}
+            {cookbook.source === 'seed' && (
+              <p className="cc-dim" style={{ marginTop: '0.6rem' }}>Seed — kör <code>cns cookbook {slug}</code> (med ANTHROPIC_API_KEY) för en AI-genererad version mot nuläget.</p>
+            )}
           </div>
         )}
       </Container>
