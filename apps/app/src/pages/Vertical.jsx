@@ -80,6 +80,8 @@ export default function Vertical() {
   );
 
   const selNode = selected ? nodeBySlug[selected] : null;
+  // Graph height scales to node count — a 4-node graph in a 520px panel reads barren.
+  const graphHeight = Math.min(540, Math.max(300, graphNodes.length * 40));
 
   // Plan surfaces (roadmap / bygg-guide / decisions) become tabs — one at a time, not
   // three stacked rails. Show only available tabs; fall back if the current one is empty.
@@ -105,13 +107,13 @@ export default function Vertical() {
         <div className="cc-panel cc-mappanel">
           <div className="cc-panel-head">Arkitektur</div>
           {graphNodes.length > 1 ? (
-            <>
-              <div className="cc-graph">
+            <div className={`cc-mapbody ${selNode ? 'cc-mapbody--split' : ''}`}>
+              <div className="cc-graph" style={{ height: graphHeight }}>
                 <NodeGraph nodes={graphNodes} selected={selected} highlight={highlight} onNodeClick={(s) => setSelected((cur) => (cur === s ? null : s))} />
                 {!selNode && <span className="cc-graph-hint">Välj en nod för att fokusera planen.</span>}
               </div>
               {selNode && (
-                <div className="cc-readout-overlay">
+                <div className="cc-readout-rail">
                   <button className="cc-readout-close" type="button" onClick={() => setSelected(null)} aria-label="Stäng">✕</button>
                   <div className="cc-sub" style={{ marginTop: 0 }}>{selNode.title || selected}</div>
                   <p className="cc-meta">{selNode.kind || ''}{selNode.type ? ` · ${selNode.type}` : ''} · {HEALTH_LABEL[selNode.health?.level] || 'Okänd'}</p>
@@ -129,7 +131,7 @@ export default function Vertical() {
                   )}
                 </div>
               )}
-            </>
+            </div>
           ) : (
             <p className="placeholder">
               {slug} är ännu en enda nod — modellera dess interna system i <code>catalog.yaml</code>.
