@@ -101,65 +101,38 @@ export default function Vertical() {
 
         {error && <p className="placeholder">Kunde inte hämta: {error}</p>}
 
-        <div className="cc-grid">
-          {/* Karta */}
-          <div className="cc-panel">
-            <div className="cc-panel-head">Arkitektur</div>
-            {graphNodes.length > 1 ? (
-              <div className="cc-graph">
-                <NodeGraph nodes={graphNodes} selected={selected} highlight={highlight} onNodeClick={(s) => setSelected((cur) => (cur === s ? null : s))} />
-              </div>
-            ) : (
-              <p className="placeholder">
-                {slug} är ännu en enda nod — modellera dess interna system i <code>catalog.yaml</code>.
-              </p>
-            )}
-          </div>
-
-          {/* Readout — speglar valet */}
-          <div className="cc-panel">
-            <div className="cc-panel-head">{selNode ? selNode.title || selected : 'Översikt'}</div>
-            {selNode ? (
-              <div className="cc-readout">
-                <p className="cc-meta">{selNode.kind || ''}{selNode.type ? ` · ${selNode.type}` : ''} · {HEALTH_LABEL[selNode.health?.level] || 'Okänd'}</p>
-                {selNode.summary && <p className="cc-summary">{selNode.summary}</p>}
-                {(selNode.url_live || selNode.url_repo) && (
-                  <p className="cc-meta">
-                    {selNode.url_live && <a href={selNode.url_live} target="_blank" rel="noreferrer">live ↗</a>}
-                    {selNode.url_repo && <> {selNode.url_live ? '· ' : ''}<a href={selNode.url_repo} target="_blank" rel="noreferrer">repo ↗</a></>}
-                  </p>
-                )}
-                {relatedEpics.length > 0 && (
-                  <>
-                    <div className="cc-sub">Epics som rör noden</div>
-                    <ul className="cc-list">{relatedEpics.map((e, i) => <li key={i}>{e.done ? '✓ ' : '○ '}{e.title} <span className="cc-dim">({e.phase})</span></li>)}</ul>
-                  </>
-                )}
-                {relatedDecisions.length > 0 && (
-                  <>
-                    <div className="cc-sub">Beslut som rör noden</div>
-                    <ul className="cc-list">{relatedDecisions.map((d, i) => <li key={i}>{d.title}</li>)}</ul>
-                  </>
-                )}
-                {relatedSteps.length > 0 && (
-                  <>
-                    <div className="cc-sub">Bygg-guide-steg som rör noden</div>
-                    <ul className="cc-list">{relatedSteps.map((s, i) => <li key={i}>{s.done ? '✓ ' : '○ '}{s.title} <span className="cc-dim">({s.discipline === 'ui_ux' ? 'UI/UX' : 'Backend'})</span></li>)}</ul>
-                  </>
-                )}
-                {relatedEpics.length === 0 && relatedDecisions.length === 0 && relatedSteps.length === 0 && (
-                  <p className="cc-dim">Inga länkade epics/beslut/steg än — lägg <code>nodes: [{selected}]</code> på en epic eller bygg-guide-steg.</p>
-                )}
-              </div>
-            ) : (
-              <div className="cc-readout">
-                {v?.roadmap
-                  ? <p className="cc-summary">Fas {v.roadmap.phase_index}/{v.roadmap.total_phases} — {v.roadmap.current_phase_title}.{v.roadmap.next_decision ? ` Nästa beslut: ${v.roadmap.next_decision}` : ''}</p>
-                  : <p className="cc-dim">Ingen roadmap än — skapa <code>roadmaps/{slug}.md</code>.</p>}
-                <p className="cc-dim">Välj en nod i grafen för att fokusera planen på den.</p>
-              </div>
-            )}
-          </div>
+        {/* Arkitektur = kartan (full bredd, hjälte). Readout dyker upp som overlay på selektion. */}
+        <div className="cc-panel cc-mappanel">
+          <div className="cc-panel-head">Arkitektur</div>
+          {graphNodes.length > 1 ? (
+            <div className="cc-graph">
+              <NodeGraph nodes={graphNodes} selected={selected} highlight={highlight} onNodeClick={(s) => setSelected((cur) => (cur === s ? null : s))} />
+              {!selNode && <span className="cc-graph-hint">Välj en nod för att fokusera planen.</span>}
+              {selNode && (
+                <div className="cc-readout-overlay">
+                  <button className="cc-readout-close" type="button" onClick={() => setSelected(null)} aria-label="Stäng">✕</button>
+                  <div className="cc-sub" style={{ marginTop: 0 }}>{selNode.title || selected}</div>
+                  <p className="cc-meta">{selNode.kind || ''}{selNode.type ? ` · ${selNode.type}` : ''} · {HEALTH_LABEL[selNode.health?.level] || 'Okänd'}</p>
+                  {selNode.summary && <p className="cc-summary">{selNode.summary}</p>}
+                  {(selNode.url_live || selNode.url_repo) && (
+                    <p className="cc-meta">
+                      {selNode.url_live && <a href={selNode.url_live} target="_blank" rel="noreferrer">live ↗</a>}
+                      {selNode.url_repo && <> {selNode.url_live ? '· ' : ''}<a href={selNode.url_repo} target="_blank" rel="noreferrer">repo ↗</a></>}
+                    </p>
+                  )}
+                  {(relatedEpics.length || relatedDecisions.length || relatedSteps.length) ? (
+                    <p className="cc-dim">Rör noden: {relatedEpics.length} epics · {relatedDecisions.length} beslut · {relatedSteps.length} steg — tänds i flikarna nedan.</p>
+                  ) : (
+                    <p className="cc-dim">Inga länkade plan-rader än — lägg <code>nodes: [{selected}]</code> på en epic/steg.</p>
+                  )}
+                </div>
+              )}
+            </div>
+          ) : (
+            <p className="placeholder">
+              {slug} är ännu en enda nod — modellera dess interna system i <code>catalog.yaml</code>.
+            </p>
+          )}
         </div>
 
         {/* Plan — Roadmap / Bygg-guide / Beslut som flikar (en i taget, ej staplade). */}
