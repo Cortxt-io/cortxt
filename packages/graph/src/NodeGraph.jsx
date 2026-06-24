@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import ReactFlow, {
   Background,
   Controls,
@@ -63,9 +63,9 @@ function CnsNode({ data }) {
   // A parent (has hidden/visible components) shows an expand affordance; otherwise the
   // glyph reads the node's role: archetype (etl/decision-engine…) leads, else type.
   const glyph = data.isParent
-    ? (data.expanded ? '⊖' : '⊕')
+    ? (data.isCollapsed ? '⊕' : '⊖')
     : (ARCHETYPE_GLYPH[data.archetype] || TYPE_GLYPH[data.type] || '◻');
-  const childHint = data.isParent && !data.expanded ? ` · ${data.childCount} delar` : '';
+  const childHint = data.isParent && data.isCollapsed ? ` · ${data.childCount} delar` : '';
   const typeLine = ([data.archetype, data.type].filter(Boolean).join(' · ') || data.kind) + childHint;
   return (
     <div style={{
@@ -82,11 +82,15 @@ function CnsNode({ data }) {
     }}>
       <Handle type="target" position={Position.Left} style={HANDLE_STYLE} isConnectable={false} />
       <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontWeight: 600 }}>
-        <span title={data.isParent ? (data.expanded ? 'Fäll ihop' : 'Expandera komponenter') : (data.type || data.kind)} style={{
-          flex: '0 0 auto', width: 18, textAlign: 'center',
-          fontFamily: 'var(--font-mono, monospace)',
-          color: data.isParent || data.selected ? ACCENT : 'var(--muted, #94a3b8)',
-        }}>{glyph}</span>
+        <span
+          onClick={data.isParent ? (e) => { e.stopPropagation(); data.onToggle?.(); } : undefined}
+          title={data.isParent ? (data.isCollapsed ? 'Expandera komponenter' : 'Fäll ihop') : (data.type || data.kind)}
+          style={{
+            flex: '0 0 auto', width: 18, textAlign: 'center',
+            fontFamily: 'var(--font-mono, monospace)',
+            cursor: data.isParent ? 'pointer' : 'inherit',
+            color: data.isParent || data.selected ? ACCENT : 'var(--muted, #94a3b8)',
+          }}>{glyph}</span>
         <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{data.label}</span>
         <span style={{ width: 8, height: 8, borderRadius: '50%', background: healthColor, flex: '0 0 auto', marginLeft: 'auto' }} />
       </div>
@@ -126,7 +130,16 @@ function buildEdges(nodes) {
 
 function Inner({ nodes: rawNodes, selected, highlight, onNodeClick }) {
   const [positions, setPositions] = useState(null);
-  const [expanded, setExpanded] = useState(() => new Set());
+  // Collapsed parents (opt-in). Default empty = the full architecture shows immediately;
+  // a small vertical graph should read as a whole, not a single collapsed root.
+  const [collapsed, setCollapsed] = useState(() => new Set());
+  const toggleCollapse = useCallback((slug) => {
+    setCollapsed((prev) => {
+      const next = new Set(prev);
+      if (next.has(slug)) next.delete(slug); else next.add(slug);
+      return next;
+    });
+  }, []);
 
   const bySlug = useMemo(() => Object.fromEntries(rawNodes.map((n) => [n.slug, n])), [rawNodes]);
 
@@ -137,28 +150,28 @@ function Inner({ nodes: rawNodes, selected, highlight, onNodeClick }) {
     return c;
   }, [rawNodes]);
 
-  // Visible = every ancestor (part_of chain) is expanded. A collapsed parent hides its subtree,
-  // so a node "expands to show its components" on click. Top-level nodes are always visible.
+  // Visible unless an ancestor (part_of chain) is explicitly collapsed. Default-expanded:
+  // collapsing a parent hides its subtree as an opt-in affordance, not the starting state.
   const visibleNodes = useMemo(() => rawNodes.filter((n) => {
     let p = n.part_of;
-    while (p) { if (!expanded.has(p)) return false; p = bySlug[p]?.part_of; }
+    while (p) { if (collapsed.has(p)) return false; p = bySlug[p]?.part_of; }
     return true;
-  }), [rawNodes, expanded, bySlug]);
+  }), [rawNodes, collapsed, bySlug]);
 
   const baseEdges = useMemo(() => buildEdges(visibleNodes), [visibleNodes]);
 
-  // Selecting a hidden node (e.g. from the readout / an epic) auto-expands its ancestors.
+  // Selecting a hidden node (e.g. from the readout / an epic) un-collapses its ancestors.
   useEffect(() => {
     if (!selected) return;
     const need = [];
     let p = bySlug[selected]?.part_of;
     while (p) { need.push(p); p = bySlug[p]?.part_of; }
     if (!need.length) return;
-    setExpanded((prev) => {
+    setCollapsed((prev) => {
+      if (!need.some((s) => prev.has(s))) return prev;
       const next = new Set(prev);
-      let changed = false;
-      need.forEach((s) => { if (!next.has(s)) { next.add(s); changed = true; } });
-      return changed ? next : prev;
+      need.forEach((s) => next.delete(s));
+      return next;
     });
   }, [selected, bySlug]);
 
@@ -197,13 +210,14 @@ function Inner({ nodes: rawNodes, selected, highlight, onNodeClick }) {
         archetype: n.archetype,
         health: n.health?.level,
         isParent: !!childCount[n.slug],
-        expanded: expanded.has(n.slug),
+        isCollapsed: collapsed.has(n.slug),
+        onToggle: () => toggleCollapse(n.slug),
         childCount: childCount[n.slug] || 0,
         selected: n.slug === selected,
         dimmed: lit ? !lit.has(n.slug) : false,
       },
     }));
-  }, [visibleNodes, positions, selected, lit, childCount, expanded]);
+  }, [visibleNodes, positions, selected, lit, childCount, collapsed, toggleCollapse]);
 
   const edges = useMemo(() => {
     if (!lit) return baseEdges;
@@ -220,14 +234,7 @@ function Inner({ nodes: rawNodes, selected, highlight, onNodeClick }) {
       nodeTypes={nodeTypes}
       nodesDraggable={false}
       nodesConnectable={false}
-      onNodeClick={(_, n) => {
-        if (childCount[n.id]) setExpanded((prev) => {
-          const next = new Set(prev);
-          if (next.has(n.id)) next.delete(n.id); else next.add(n.id);
-          return next;
-        });
-        onNodeClick?.(n.id);
-      }}
+      onNodeClick={(_, n) => onNodeClick?.(n.id)}
       fitView
       proOptions={{ hideAttribution: true }}
       minZoom={0.2}
